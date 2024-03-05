@@ -2,14 +2,12 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
 use App\Repository\AlbumRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AlbumRepository::class)]
-#[ApiResource]
 class Album
 {
     #[ORM\Id]
@@ -23,15 +21,15 @@ class Album
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
 
-    #[ORM\ManyToOne(inversedBy: 'albums')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?AppUser $user_id = null;
-
     #[ORM\ManyToMany(targetEntity: AppUser::class, mappedBy: 'shared_albums')]
     private Collection $shared_to;
 
     #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'album', orphanRemoval: true)]
     private Collection $photos;
+
+    #[ORM\ManyToOne(inversedBy: 'albums')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?AppUser $owner = null;
 
 
     public function __construct()
@@ -65,18 +63,6 @@ class Album
     public function setCreatedAt(\DateTimeImmutable $created_at): static
     {
         $this->created_at = $created_at;
-
-        return $this;
-    }
-
-    public function getUserId(): ?AppUser
-    {
-        return $this->user_id;
-    }
-
-    public function setUserId(?AppUser $user_id): static
-    {
-        $this->user_id = $user_id;
 
         return $this;
     }
@@ -134,6 +120,18 @@ class Album
                 $photo->setAlbum(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOwner(): ?AppUser
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?AppUser $owner): static
+    {
+        $this->owner = $owner;
 
         return $this;
     }

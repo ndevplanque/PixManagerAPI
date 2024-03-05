@@ -9,7 +9,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AppUserRepository::class)]
-#[ApiResource]
 class AppUser
 {
     #[ORM\Id]
@@ -26,16 +25,16 @@ class AppUser
     #[ORM\Column]
     private ?bool $is_admin = null;
 
-    #[ORM\OneToMany(targetEntity: Album::class, mappedBy: 'user_id', orphanRemoval: true)]
-    private Collection $albums;
-
     #[ORM\ManyToMany(targetEntity: Album::class, inversedBy: 'shared_to')]
     private Collection $shared_albums;
 
+    #[ORM\OneToMany(targetEntity: Album::class, mappedBy: 'owner', orphanRemoval: true)]
+    private Collection $albums;
+
     public function __construct()
     {
-        $this->albums = new ArrayCollection();
         $this->shared_albums = new ArrayCollection();
+        $this->albums = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -82,36 +81,6 @@ class AppUser
     /**
      * @return Collection<int, Album>
      */
-    public function getAlbums(): Collection
-    {
-        return $this->albums;
-    }
-
-    public function addAlbum(Album $album): static
-    {
-        if (!$this->albums->contains($album)) {
-            $this->albums->add($album);
-            $album->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAlbum(Album $album): static
-    {
-        if ($this->albums->removeElement($album)) {
-            // set the owning side to null (unless already changed)
-            if ($album->getUserId() === $this) {
-                $album->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Album>
-     */
     public function getSharedAlbums(): Collection
     {
         return $this->shared_albums;
@@ -129,6 +98,36 @@ class AppUser
     public function removeSharedAlbum(Album $sharedAlbum): static
     {
         $this->shared_albums->removeElement($sharedAlbum);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Album>
+     */
+    public function getAlbums(): Collection
+    {
+        return $this->albums;
+    }
+
+    public function addAlbum(Album $album): static
+    {
+        if (!$this->albums->contains($album)) {
+            $this->albums->add($album);
+            $album->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAlbum(Album $album): static
+    {
+        if ($this->albums->removeElement($album)) {
+            // set the owning side to null (unless already changed)
+            if ($album->getOwner() === $this) {
+                $album->setOwner(null);
+            }
+        }
 
         return $this;
     }
