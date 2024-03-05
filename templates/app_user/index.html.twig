@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<title>AppUser index</title>
+
+{% block body %}
+    <h1>AppUser index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Email</th>
+                <th>Password</th>
+                <th>Is_admin</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for app_user in app_users %}
+            <tr>
+                <td>{{ app_user.id }}</td>
+                <td>{{ app_user.email }}</td>
+                <td>{{ app_user.password }}</td>
+                <td>{{ app_user.isAdmin ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_user_show', {'id': app_user.id}) }}">show</a>
+                    <a href="{{ path('app_user_edit', {'id': app_user.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_user_new') }}">Create new</a>
+{% endblock %}
