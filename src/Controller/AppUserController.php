@@ -47,39 +47,40 @@ class AppUserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
-    public function show(AppUser $appUser): Response
+    public function show(AppUser $appUser): JsonResponse
     {
-        return $this->render('app_user/show.html.twig', [
-            'app_user' => $appUser,
-        ]);
+        return $this->json(['user' => $appUser]);
     }
 
     #[Route('/{id}/edit', name: 'app_user_edit', methods: ['PUT'])]
-    public function edit(Request $request, AppUser $appUser, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, AppUser $appUser, EntityManagerInterface $entityManager): JsonResponse
     {
         $form = $this->createForm(AppUserType::class, $appUser);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+            return $this->json([
+                'user' => $appUser,
+                'form' => $form,
+            ]);
         }
 
-        return $this->render('app_user/edit.html.twig', [
-            'app_user' => $appUser,
+        return $this->json([
+            'user' => $appUser,
             'form' => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
-    public function delete(Request $request, AppUser $appUser, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, AppUser $appUser, EntityManagerInterface $entityManager): JsonResponse
     {
         if ($this->isCsrfTokenValid('delete' . $appUser->getId(), $request->request->get('_token'))) {
             $entityManager->remove($appUser);
             $entityManager->flush();
+            return $this->json([], 204);
         }
 
-        return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+        return $this->json([], 400);
     }
 }
