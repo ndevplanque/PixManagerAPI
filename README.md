@@ -29,8 +29,14 @@ php bin/console doctrine:database:create*
 ```
 - La peupler avec cette commande
 ```sh
-php bin/console make:migration
+php bin/console doctrine:migrations:migrate
 ```
+- Se connecter pour vérifier que tout est bon
+```sh
+symfony run psql --dbname=pix_manager --username=postgres
+pix_manager=# \dt
+```
+Fin des pré-requis.
 
 ## Utiliser `make`
 - Pour créer un simple Controller
@@ -43,9 +49,10 @@ php bin/console make:controller HealthCheckController
 php bin/console make:crud Photo
 ```
 
-- Pour créer une Entity [(petite aide)](https://symfony.com/doc/current/doctrine.html#creating-an-entity-class)
+- Pour créer une Entity [(petite aide)](https://symfony.com/doc/current/doctrine.html#creating-an-entity-class) + générer une migration
 ```sh
-php bin/console make:entity  
+php bin/console make:entity
+php bin/console make:migration
 ```
 
 ## Lancer les tests
