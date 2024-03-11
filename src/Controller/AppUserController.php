@@ -3,83 +3,90 @@
 namespace App\Controller;
 
 use App\Entity\AppUser;
-use App\Form\AppUserType;
 use App\Repository\AppUserRepository;
+use App\Utils\JsonHelper;
+use App\Utils\PasswordHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/users')]
 class AppUserController extends AbstractController
 {
-    #[Route('/', name: 'app_user_index', methods: ['GET'])]
-    public function index(AppUserRepository $appUserRepository): JsonResponse
+    private readonly JsonHelper $jsonHelper;
+    private readonly PasswordHelper $passwordHelper;
+
+    public function __construct()
     {
-        return $this->json([
-            'users' => $appUserRepository->findAll(),
-        ]);
+        $this->jsonHelper = new JsonHelper();
+        $this->passwordHelper = new PasswordHelper();
     }
 
-    #[Route('/', name: 'app_user_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/api/users/{id}', name: 'getUserById', methods: ['GET'])]
+    public function getUserById(
+        AppUser             $user,
+        SerializerInterface $serializer,
+    ): JsonResponse
     {
-        $appUser = new AppUser();
-        $form = $this->createForm(AppUserType::class, $appUser);
-        $form->handleRequest($request);
+        $json = $serializer->serialize($user, 'json', ['groups' => ['users']]);
+        return $this->jsonHelper->send($json);
+    }
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($appUser);
-            $entityManager->flush();
+    #[Route('/api/users', name: 'getUsers', methods: ['GET'])]
+    public function getUsers(
+        AppUserRepository   $userRepository,
+        SerializerInterface $serializer,
+    ): JsonResponse
+    {
+        $users = $userRepository->findAll();
+        $json = $serializer->serialize($users, 'json', ['groups' => ['users']]);
+        return $this->jsonHelper->send($json);
+    }
 
-            return $this->json([
-                'app_user' => $appUser,
-                'form' => $form,
-            ]);
+    #[Route('/api/users', name: "createUser", methods: ['POST'])]
+    public function createUser(
+        Request                $request,
+        SerializerInterface    $serializer,
+        EntityManagerInterface $entityManager,
+        UrlGeneratorInterface  $urlGenerator,
+    ): JsonResponse
+    {
+        $user = $serializer->deserialize($request->getContent(), AppUser::class, 'json');
+        $user->setRoles(['ROLE_USER']);
+
+        if ($user->isAdmin() === null) {
+            $user->setIsAdmin(false);
+            $user->setRoles(
+                array_merge($user->getRoles(), ['ROLE_ADMIN'])
+            );
         }
 
-        return $this->json([
-            'app_user' => $appUser,
-            'form' => $form,
-        ], 400);
+        $user->setPassword($this->passwordHelper->hash($user->getPassword()));
+
+        $entityManager->persist($user);
+        $entityManager->persist($user->newAlbum());
+        $entityManager->flush();
+
+        $json = $serializer->serialize($user, 'json', ['groups' => 'users']);
+
+        // si on voulait rediriger vers une page détaillant le user
+        $location = null; // $urlGenerator->generate('detailUser', ['id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        return $this->jsonHelper->created($json, $location);
     }
 
-    #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
-    public function show(AppUser $appUser): JsonResponse
+    #[Route('/api/users/{id}', name: 'deleteUser', methods: ['DELETE'])]
+    public function deleteUser(
+        AppUser                $user,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
     {
-        return $this->json(['user' => $appUser]);
-    }
+        $entityManager->remove($user);
+        $entityManager->flush();
 
-    #[Route('/{id}', name: 'app_user_edit', methods: ['PUT'])]
-    public function edit(Request $request, AppUser $appUser, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $form = $this->createForm(AppUserType::class, $appUser);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-            return $this->json([
-                'user' => $appUser,
-                'form' => $form,
-            ]);
-        }
-
-        return $this->json([
-            'user' => $appUser,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
-    public function delete(Request $request, AppUser $appUser, EntityManagerInterface $entityManager): JsonResponse
-    {
-        if ($this->isCsrfTokenValid('delete' . $appUser->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($appUser);
-            $entityManager->flush();
-            return $this->json([], 204);
-        }
-
-        return $this->json([], 400);
+        return $this->jsonHelper->noContent();
     }
 }
