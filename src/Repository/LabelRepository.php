@@ -4,7 +4,10 @@ namespace App\Repository;
 
 use App\Entity\Label;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
 
 /**
  * @extends ServiceEntityRepository<Label>
@@ -16,9 +19,23 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class LabelRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private readonly EntityManagerInterface $manager;
+
+    public function __construct(
+        ManagerRegistry $registry,
+        EntityManagerInterface $manager
+    )
     {
         parent::__construct($registry, Label::class);
+        $this->manager = $manager;
+    }
+
+    public function insert(string $name): Label
+    {
+        $label = new Label($name);
+        $this->manager->persist($label);
+        $this->manager->flush();
+        return $label;
     }
 
     //    /**

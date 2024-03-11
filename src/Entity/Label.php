@@ -6,6 +6,7 @@ use App\Repository\LabelRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: LabelRepository::class)]
 class Label
@@ -15,15 +16,17 @@ class Label
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups('photos')]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
     #[ORM\ManyToMany(targetEntity: Photo::class, inversedBy: 'labels')]
     private Collection $photos;
 
-    public function __construct()
+    public function __construct(string $name = null)
     {
         $this->photos = new ArrayCollection();
+        $this->name = $name;
     }
 
     public function getId(): ?int
