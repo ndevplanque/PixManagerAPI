@@ -28,6 +28,7 @@ class AppFixtures extends Fixture
             $user->setEmail(USERS[$i]['email']);
             $user->setPassword(USERS[$i]['password']);
             $user->setIsAdmin(USERS[$i]['is_admin']);
+            $user->setRoles(USERS[$i]['roles']);
 
             $manager->persist($user);
             $manager->flush();
@@ -82,25 +83,30 @@ const USERS = [
         'email' => 'macron@demission.fr',
         'password' => 'explosion',
         'is_admin' => true,
+        'roles' => ['ROLE_ADMIN', 'ROLE_USER'],
     ],
     [
         'email' => 'daniel@team.fr',
         'password' => 'explosion',
-        'is_admin' => true,
+        'is_admin' => false,
+        'roles' => ['ROLE_USER'],
     ],
     [
         'email' => 'jerome@team.fr',
         'password' => 'explosion',
-        'is_admin' => true,
+        'is_admin' => false,
+        'roles' => ['ROLE_USER'],
     ],
     [
         'email' => 'sacha@team.fr',
         'password' => 'explosion',
-        'is_admin' => true,
+        'is_admin' => false,
+        'roles' => ['ROLE_USER'],
     ],
     [
         'email' => 'hurkan@team.fr',
         'password' => 'explosion',
-        'is_admin' => true,
+        'is_admin' => false,
+        'roles' => ['ROLE_USER'],
     ],
 ];
