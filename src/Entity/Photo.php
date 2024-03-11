@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PhotoRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,7 +20,7 @@ class Photo
     private ?string $name = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?DateTimeImmutable $created_at = null;
 
     #[ORM\ManyToMany(targetEntity: Label::class, mappedBy: 'photos')]
     private Collection $labels;
@@ -29,8 +29,10 @@ class Photo
     #[ORM\JoinColumn(nullable: false)]
     private ?Album $album = null;
 
+    /** @deprecated use Album::newPhoto() */
     public function __construct()
     {
+        $this->created_at = new DateTimeImmutable();
         $this->labels = new ArrayCollection();
     }
 
@@ -51,16 +53,9 @@ class Photo
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
-    {
-        $this->created_at = $created_at;
-
-        return $this;
     }
 
     /**

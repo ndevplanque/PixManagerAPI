@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
 use App\Repository\AppUserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -29,12 +28,12 @@ class AppUser
     private Collection $shared_albums;
 
     #[ORM\OneToMany(targetEntity: Album::class, mappedBy: 'owner', orphanRemoval: true)]
-    private Collection $albums;
+    private Collection $owned_albums;
 
     public function __construct()
     {
         $this->shared_albums = new ArrayCollection();
-        $this->albums = new ArrayCollection();
+        $this->owned_albums = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -105,30 +104,42 @@ class AppUser
     /**
      * @return Collection<int, Album>
      */
-    public function getAlbums(): Collection
+    public function getOwnedAlbums(): Collection
     {
-        return $this->albums;
+        return $this->owned_albums;
     }
 
-    public function addAlbum(Album $album): static
+    public function addOwnedAlbum(Album $ownedAlbum): static
     {
-        if (!$this->albums->contains($album)) {
-            $this->albums->add($album);
-            $album->setOwner($this);
+        if (!$this->owned_albums->contains($ownedAlbum)) {
+            $this->owned_albums->add($ownedAlbum);
+            $ownedAlbum->setOwner($this);
         }
 
         return $this;
     }
 
-    public function removeAlbum(Album $album): static
+    public function removeOwnedAlbum(Album $ownedAlbum): static
     {
-        if ($this->albums->removeElement($album)) {
+        if ($this->owned_albums->removeElement($ownedAlbum)) {
             // set the owning side to null (unless already changed)
-            if ($album->getOwner() === $this) {
-                $album->setOwner(null);
+            if ($ownedAlbum->getOwner() === $this) {
+                $ownedAlbum->setOwner(null);
             }
         }
 
         return $this;
+    }
+
+    public function getUsername(): string{
+        return explode('@', $this->email)[0];
+    }
+
+    public function newAlbum(): Album
+    {
+        $album = new Album();
+        $this->addOwnedAlbum($album);
+        $album->setName('Default');
+        return $album;
     }
 }

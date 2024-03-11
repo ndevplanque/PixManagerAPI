@@ -9,7 +9,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/users')]
@@ -52,7 +51,7 @@ class AppUserController extends AbstractController
         return $this->json(['user' => $appUser]);
     }
 
-    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['PUT'])]
+    #[Route('/{id}', name: 'app_user_edit', methods: ['PUT'])]
     public function edit(Request $request, AppUser $appUser, EntityManagerInterface $entityManager): JsonResponse
     {
         $form = $this->createForm(AppUserType::class, $appUser);

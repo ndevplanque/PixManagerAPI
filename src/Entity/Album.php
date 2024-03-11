@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\AlbumRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -19,7 +20,7 @@ class Album
     private ?string $name = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?DateTimeImmutable $created_at = null;
 
     #[ORM\ManyToMany(targetEntity: AppUser::class, mappedBy: 'shared_albums')]
     private Collection $shared_to;
@@ -31,9 +32,10 @@ class Album
     #[ORM\JoinColumn(nullable: false)]
     private ?AppUser $owner = null;
 
-
+    /** @deprecated use AppUser::newAlbum() */
     public function __construct()
     {
+        $this->created_at = new DateTimeImmutable();
         $this->shared_to = new ArrayCollection();
         $this->photos = new ArrayCollection();
     }
@@ -55,16 +57,9 @@ class Album
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
-    {
-        $this->created_at = $created_at;
-
-        return $this;
     }
 
     /**
@@ -134,5 +129,11 @@ class Album
         $this->owner = $owner;
 
         return $this;
+    }
+
+    public function newPhoto():Photo{
+        $this->addPhoto($photo = new Photo());
+        $photo->setAlbum($this);
+        return $photo;
     }
 }

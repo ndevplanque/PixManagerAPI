@@ -4,37 +4,33 @@
 
 ### Packages
 
-- Installer make
+- Installer les dépendances
 ```sh
-composer require --dev symfony/maker-bundle
-composer require form validator twig-bundle orm security-csrf  
-```
-
-- Installer Doctrine
-```sh
-composer require symfony/orm-pack
-```
-
-- Installer PhpUnit
-```sh
-composer require --dev symfony/test-pack
+composer require --dev symfony/maker-bundle orm-fixtures symfony/test-pack
+composer require form validator twig-bundle orm security-csrf symfony/orm-pack
 ```
 
 ### Base de données
 - Installer PostgreSQL version 16 via Google
 - Configurer `DATABASE_URL` dans le fichier `.env`
-- Créer la BDD avec cette commande
+- Créer la BDD
 ```sh
 php bin/console doctrine:database:create*
 ```
-- La peupler avec cette commande
+- Créer la structure
 ```sh
 php bin/console doctrine:migrations:migrate
+```
+- La peupler de données
+```sh
+php bin/console doctrine:fixtures:load --purge-with-truncate
+
 ```
 - Se connecter pour vérifier que tout est bon
 ```sh
 symfony run psql --dbname=pix_manager --username=postgres
 pix_manager=# \dt
+pix_manager=# select * from app_user;
 ```
 Fin des pré-requis.
 
