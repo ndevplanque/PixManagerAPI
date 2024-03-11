@@ -7,7 +7,7 @@
 - Installer les dépendances
 ```sh
 composer require --dev symfony/maker-bundle orm-fixtures symfony/test-pack
-composer require form validator twig-bundle orm security-csrf symfony/orm-pack
+composer require form validator twig-bundle orm security-csrf symfony/orm-pack symfony/serializer-pack symfony/validator doctrine/annotations security
 ```
 
 ### Base de données
@@ -15,7 +15,7 @@ composer require form validator twig-bundle orm security-csrf symfony/orm-pack
 - Configurer `DATABASE_URL` dans le fichier `.env`
 - Créer la BDD
 ```sh
-php bin/console doctrine:database:create*
+php bin/console doctrine:database:create
 ```
 - Créer la structure
 ```sh
@@ -24,7 +24,6 @@ php bin/console doctrine:migrations:migrate
 - La peupler de données
 ```sh
 php bin/console doctrine:fixtures:load --purge-with-truncate
-
 ```
 - Se connecter pour vérifier que tout est bon
 ```sh
