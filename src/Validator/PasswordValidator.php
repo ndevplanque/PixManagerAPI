@@ -16,7 +16,7 @@ class PasswordValidator
         // todo: add regex
         $ok = true;
 
-        if (!ok){
+        if (!$ok){
             throw new HttpException(
                 Response::HTTP_BAD_REQUEST,
                 'New password does not match policy.'
