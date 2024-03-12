@@ -5,13 +5,11 @@ namespace Tests\App\Factory;
 use App\Entity\Album;
 use App\Entity\Label;
 use App\Entity\Photo;
-use App\Factory\LabelFactory;
 use App\Factory\PhotoFactory;
 use App\Repository\LabelRepository;
 use App\Validator\PayloadValidator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PhotoFactoryTest extends TestCase
 {
@@ -47,17 +45,11 @@ class PhotoFactoryTest extends TestCase
 
         $this->labelRepository
             ->expects($this->exactly(2))
-            ->method('findOneBy')
+            ->method('findOrInsert')
             ->willReturnMap([
-                [['name' => 'macron'], null, null],
-                [['name' => 'chien'], null, $labelChien = $this->createMock(Label::class)],
+                ['macron', $labelMacron = $this->createMock(Label::class)],
+                ['chien', $labelChien = $this->createMock(Label::class)],
             ]);
-
-        $this->labelRepository
-            ->expects($this->once())
-            ->method('insert')
-            ->with(new Label('macron'))
-            ->willReturn($labelMacron = $this->createMock(Label::class));
 
         $photo->addLabel($labelChien);
         $photo->addLabel($labelMacron);

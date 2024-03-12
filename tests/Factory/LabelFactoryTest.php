@@ -2,12 +2,10 @@
 
 namespace Tests\App\Factory;
 
-use App\Entity\Label;
 use App\Factory\LabelFactory;
 use App\Validator\PayloadValidator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LabelFactoryTest extends TestCase
 {
