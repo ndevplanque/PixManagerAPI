@@ -3,78 +3,84 @@
 namespace App\Controller;
 
 use App\Entity\Album;
+use App\Entity\AppUser;
 use App\Entity\Photo;
-use App\Factory\PhotoFactory;
+use App\Service\Photo\PhotoCreateService;
+use App\Service\Photo\PhotoDeleteService;
+use App\Service\Photo\PhotoListingByAlbumService;
+use App\Service\Photo\PhotoListingByUserService;
 use App\Utils\JsonHelper;
-use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class PhotoController extends AbstractController
 {
-    private readonly PhotoFactory $photoFactory;
     private readonly JsonHelper $jsonHelper;
 
-    public function __construct(PhotoFactory $photoFactory)
+    public function __construct(JsonHelper $jsonHelper,)
     {
-        $this->photoFactory = $photoFactory;
-        $this->jsonHelper = new JsonHelper();
+        $this->jsonHelper = $jsonHelper;
     }
 
-    #[Route('/api/albums/{id}/photos', name: 'getPhotos', methods: ['GET'])]
-    public function getPhotos(
-        Album               $album,
-        SerializerInterface $serializer,
+    #[Route('/api/albums/{id}/photos', name: 'listPhotosByAlbum', methods: ['GET'])]
+    public function listPhotosByAlbum(
+        Album                      $album,
+        PhotoListingByAlbumService $photoListingByAlbumService,
+        SerializerInterface        $serializer,
     ): JsonResponse
     {
         $user = $album->getOwner();
-
         // todo: security check -> requester should be $user
+        $photos = $photoListingByAlbumService->handle($album);
+        $json = $serializer->serialize($photos, 'json', ['groups' => ['photos']]);
+        return $this->jsonHelper->send($json);
+    }
 
-        $photos = $album->getPhotos()->getValues();
+    /**
+     * @throws Exception
+     */
+    #[Route('/api/users/{id}/photos', name: 'listPhotosByUser', methods: ['GET'])]
+    public function listPhotosByUser(
+        AppUser                   $user,
+        PhotoListingByUserService $photoListingByUserService,
+        SerializerInterface       $serializer,
+    ): JsonResponse
+    {
+        // todo: security check -> requester should be $user
+        $photos = $photoListingByUserService->handle($user);
         $json = $serializer->serialize($photos, 'json', ['groups' => ['photos']]);
         return $this->jsonHelper->send($json);
     }
 
     #[Route('/api/albums/{id}/photos', name: "createPhoto", methods: ['POST'])]
     public function createPhoto(
-        Album                  $album,
-        Request                $request,
-        SerializerInterface    $serializer,
-        EntityManagerInterface $entityManager,
-        UrlGeneratorInterface  $urlGenerator,
+        Request             $request,
+        Album               $album,
+        PhotoCreateService  $photoCreateService,
+        SerializerInterface $serializer,
     ): JsonResponse
     {
         $user = $album->getOwner();
-
         // todo: security check -> requester should be $user
-
-        $photo = $this->photoFactory->fromAlbumAndRequest($album, $request);
-
-        $entityManager->persist($photo);
-        $entityManager->flush();
-
+        $photo = $photoCreateService->handle($request, $album);
         $json = $serializer->serialize($photo, 'json', ['groups' => 'photos']);
-
-        // si on voulait rediriger vers une page détaillant la photo
-        $location = null; // $urlGenerator->generate('detailPhoto', ['id' => $photo->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-
-        return $this->jsonHelper->created($json, $location);
+        return $this->jsonHelper->created($json);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/api/photos/{id}', name: 'deletePhoto', methods: ['DELETE'])]
     public function deletePhoto(
-        Photo                  $photo,
-        EntityManagerInterface $entityManager,
+        Photo              $photo,
+        PhotoDeleteService $photoDeleteService,
     ): JsonResponse
     {
-        $entityManager->remove($photo);
-        $entityManager->flush();
-
+        $photoDeleteService->handle($photo);
         return $this->jsonHelper->noContent();
     }
 }
