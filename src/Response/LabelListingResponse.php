@@ -7,12 +7,11 @@ use JsonSerializable;
 
 class LabelListingResponse implements JsonSerializable
 {
-    /** @var Label[] $items */
-    private array $items;
-
-    public function __construct(array $items)
+    /** @param Label[] $items */
+    public function __construct(
+        private readonly array $items
+    )
     {
-        $this->items = $items;
     }
 
     public function jsonSerialize(): array

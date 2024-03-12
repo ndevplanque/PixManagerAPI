@@ -9,6 +9,7 @@ use App\Service\Photo\PhotoCreateService;
 use App\Service\Photo\PhotoDeleteService;
 use App\Service\Photo\PhotoListingByAlbumService;
 use App\Service\Photo\PhotoListingByUserService;
+use App\Service\Photo\PhotoUpdateService;
 use App\Utils\JsonHelper;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,11 +20,10 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class PhotoController extends AbstractController
 {
-    private readonly JsonHelper $jsonHelper;
-
-    public function __construct(JsonHelper $jsonHelper,)
+    public function __construct(
+        private readonly JsonHelper $jsonHelper,
+    )
     {
-        $this->jsonHelper = $jsonHelper;
     }
 
     #[Route('/api/albums/{id}/photos', name: 'listPhotosByAlbum', methods: ['GET'])]
@@ -67,6 +67,21 @@ class PhotoController extends AbstractController
         $user = $album->getOwner();
         // todo: security check -> requester should be $user
         $photo = $photoCreateService->handle($request, $album);
+        $json = json_encode($photo->jsonSerialize());
+        return $this->jsonHelper->created($json);
+    }
+
+    #[Route('/api/photos/{id}', name: "updatePhoto", methods: ['PUT'])]
+    public function updatePhoto(
+        Request             $request,
+        Photo               $photo,
+        PhotoUpdateService  $photoUpdateService,
+        SerializerInterface $serializer,
+    ): JsonResponse
+    {
+        $user = $photo->getAlbum()->getOwner();
+        // todo: security check -> requester should be $user
+        $photo = $photoUpdateService->handle($request, $photo);
         $json = $serializer->serialize($photo, 'json', ['groups' => 'photos']);
         return $this->jsonHelper->created($json);
     }

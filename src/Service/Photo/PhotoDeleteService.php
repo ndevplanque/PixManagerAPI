@@ -8,11 +8,10 @@ use Exception;
 
 class PhotoDeleteService
 {
-    private readonly PhotoRepository $photoRepository;
-
-    public function __construct(PhotoRepository $photoRepository)
+    public function __construct(
+        private readonly PhotoRepository $photoRepository,
+    )
     {
-        $this->photoRepository = $photoRepository;
     }
 
     /**

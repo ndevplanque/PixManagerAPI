@@ -7,13 +7,10 @@ use App\Response\LabelListingResponse;
 
 class LabelListingService
 {
-    private readonly LabelRepository $labelRepository;
-
     public function __construct(
-        LabelRepository $labelRepository,
+        private readonly LabelRepository $labelRepository,
     )
     {
-        $this->labelRepository = $labelRepository;
     }
 
     public function handle(): LabelListingResponse

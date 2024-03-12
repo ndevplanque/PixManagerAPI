@@ -17,18 +17,22 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PhotoRepository extends ServiceEntityRepository
 {
-    private readonly EntityManagerInterface $manager;
-
     public function __construct(
-        ManagerRegistry        $registry,
-        EntityManagerInterface $manager,
+        ManagerRegistry                         $registry,
+        private readonly EntityManagerInterface $manager,
     )
     {
         parent::__construct($registry, Photo::class);
-        $this->manager = $manager;
     }
 
     public function insert(Photo $photo): Photo
+    {
+        $this->manager->persist($photo);
+        $this->manager->flush();
+        return $photo;
+    }
+
+    public function update(Photo $photo): Photo
     {
         $this->manager->persist($photo);
         $this->manager->flush();
@@ -39,12 +43,5 @@ class PhotoRepository extends ServiceEntityRepository
     {
         $this->manager->remove($photo);
         $this->manager->flush();
-    }
-
-    public function patch(Photo $photo): Photo
-    {
-        $this->manager->persist($photo);
-        $this->manager->flush();
-        return $photo;
     }
 }

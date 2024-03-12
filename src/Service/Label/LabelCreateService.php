@@ -9,16 +9,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 class LabelCreateService
 {
-    private readonly LabelRepository $labelRepository;
-    private readonly LabelFactory $labelFactory;
-
     public function __construct(
-        LabelRepository $labelRepository,
-        LabelFactory    $labelFactory,
+       private readonly LabelRepository $labelRepository,
+       private readonly LabelFactory    $labelFactory,
     )
     {
-        $this->labelRepository = $labelRepository;
-        $this->labelFactory = $labelFactory;
     }
 
     public function handle(Request $request): Label

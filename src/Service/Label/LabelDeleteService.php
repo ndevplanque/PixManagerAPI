@@ -5,14 +5,14 @@ namespace App\Service\Label;
 use App\Repository\LabelRepository;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LabelDeleteService
 {
-    private readonly LabelRepository $labelRepository;
-
-    public function __construct(LabelRepository $labelRepository)
+    public function __construct(
+        private readonly LabelRepository $labelRepository,
+    )
     {
-        $this->labelRepository = $labelRepository;
     }
 
     /**
@@ -22,8 +22,12 @@ class LabelDeleteService
     {
         $payload = $request->toArray();
 
-        $this->labelRepository->delete(
-            $this->labelRepository->findOneBy(['name' => $payload['name']])
-        );
+        $label = $this->labelRepository->findOneBy(['name' => $payload['name']]);
+
+        if ($label === null) {
+            throw new HttpException(404, "Label {$payload['name']} not found!");
+        }
+
+        $this->labelRepository->delete($label);
     }
 }

@@ -5,15 +5,13 @@ namespace App\Factory;
 use App\Entity\Label;
 use App\Validator\PayloadValidator;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LabelFactory
 {
-    private readonly PayloadValidator $payloadValidator;
-
-    public function __construct(PayloadValidator $payloadValidator)
+    public function __construct(
+        private readonly PayloadValidator $payloadValidator,
+    )
     {
-        $this->payloadValidator = $payloadValidator;
     }
 
     public function fromRequest(Request $request): Label

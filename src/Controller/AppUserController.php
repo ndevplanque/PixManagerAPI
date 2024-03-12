@@ -16,13 +16,11 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class AppUserController extends AbstractController
 {
-    private readonly JsonHelper $jsonHelper;
-    private readonly PasswordHelper $passwordHelper;
-
-    public function __construct()
+    public function __construct(
+        private readonly JsonHelper     $jsonHelper,
+        private readonly PasswordHelper $passwordHelper,
+    )
     {
-        $this->jsonHelper = new JsonHelper();
-        $this->passwordHelper = new PasswordHelper();
     }
 
     #[Route('/api/users/{id}', name: 'getUserById', methods: ['GET'])]

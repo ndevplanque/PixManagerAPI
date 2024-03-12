@@ -15,11 +15,10 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class LabelController extends AbstractController
 {
-    private readonly JsonHelper $jsonHelper;
-
-    public function __construct(JsonHelper $jsonHelper)
+    public function __construct(
+        private readonly JsonHelper $jsonHelper,
+    )
     {
-        $this->jsonHelper = $jsonHelper;
     }
 
     #[Route('/api/labels', name: 'listLabels', methods: ['GET'])]

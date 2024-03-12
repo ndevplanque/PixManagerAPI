@@ -6,11 +6,10 @@ use App\Validator\PasswordValidator;
 
 class PasswordHelper
 {
-    private readonly PasswordValidator $passwordValidator;
-
-    public function __construct(PasswordValidator $passwordValidator)
+    public function __construct(
+        private readonly PasswordValidator $passwordValidator
+    )
     {
-        $this->passwordValidator = $passwordValidator;
     }
 
     public function hash(string $newPassword): string

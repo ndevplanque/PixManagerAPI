@@ -4,7 +4,6 @@ namespace App\DataFixtures;
 
 use App\Entity\AppUser;
 use App\Entity\Label;
-use App\Entity\Photo;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -39,13 +38,8 @@ class AppFixtures extends Fixture
 
         // create photos
         for ($i = 0; $i < count(PHOTOS); $i++) {
-            $photo = new Photo();
-
             $user = $manager->getRepository(AppUser::class)->findOneBy(['email' => PHOTOS[$i]['email']]);
-            $album = $user->getOwnedAlbums()->first();
-
-            $photo->setAlbum($album);
-            $photo->setName(PHOTOS[$i]['name']);
+            $photo = $user->getOwnedAlbums()->first()->newPhoto(PHOTOS[$i]['name']);
 
             $labels = PHOTOS[$i]['labels'];
             for ($j = 0; $j < count($labels); $j++) {
