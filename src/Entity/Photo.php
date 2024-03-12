@@ -35,10 +35,11 @@ class Photo
     private ?Album $album = null;
 
     /** @deprecated use Album::newPhoto() */
-    public function __construct()
+    public function __construct(string $name = null)
     {
         $this->created_at = new DateTimeImmutable();
         $this->labels = new ArrayCollection();
+        $this->name = $name;
     }
 
     public function getId(): ?int

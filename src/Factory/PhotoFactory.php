@@ -14,19 +14,21 @@ class PhotoFactory
     private readonly LabelRepository $labelRepository;
     private readonly PayloadValidator $payloadValidator;
 
-    public function __construct(LabelRepository $labelRepository)
+    public function __construct(
+        LabelRepository  $labelRepository,
+        PayloadValidator $payloadValidator,
+    )
     {
         $this->labelRepository = $labelRepository;
-        $this->payloadValidator = new PayloadValidator();
+        $this->payloadValidator = $payloadValidator;
     }
 
-    public function fromAlbumAndRequest(Album $album, Request $request): Photo
+    public function fromRequestAndAlbum(Request $request, Album $album): Photo
     {
         $payload = $request->toArray();
         $this->validate($payload);
 
-        $photo = $album->newPhoto();
-        $photo->setName($payload['name']);
+        $photo = $album->newPhoto($payload['name']);
 
         for ($i = 0; $i < count($payload['labels']); $i++) {
             $label = $this->labelRepository->findOneBy(['name' => $payload['labels'][$i]]);
