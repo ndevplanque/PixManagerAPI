@@ -6,6 +6,7 @@ use App\Entity\Label;
 use App\Factory\LabelFactory;
 use App\Repository\LabelRepository;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LabelCreateService
 {
@@ -14,7 +15,7 @@ class LabelCreateService
 
     public function __construct(
         LabelRepository $labelRepository,
-        LabelFactory $labelFactory,
+        LabelFactory    $labelFactory,
     )
     {
         $this->labelRepository = $labelRepository;
@@ -23,8 +24,8 @@ class LabelCreateService
 
     public function handle(Request $request): Label
     {
-        $label = $this->labelFactory->fromRequest($request);
-
-        return $this->labelRepository->insert($label);
+        return $this->labelRepository->insert(
+            $this->labelFactory->fromRequest($request)
+        );
     }
 }

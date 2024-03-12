@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @extends ServiceEntityRepository<Label>
@@ -32,6 +33,9 @@ class LabelRepository extends ServiceEntityRepository
 
     public function insert(Label $label): Label
     {
+        if ($this->findOneBy(['name' => $label->getName()]) !== null) {
+            throw new HttpException(400, 'This label already exists !');
+        }
         $this->manager->persist($label);
         $this->manager->flush();
         return $label;
