@@ -20,7 +20,7 @@ class PhotoListingByUserService
 
         foreach ($albums as $album) {
             /** @var Album $album */
-            $photos[] = $album->getPhotos()->getValues();
+            $photos = array_merge($photos, $album->getPhotos()->getValues());
         }
 
         return $photos;

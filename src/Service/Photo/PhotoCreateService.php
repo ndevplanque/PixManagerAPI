@@ -10,16 +10,16 @@ use Symfony\Component\HttpFoundation\Request;
 
 class PhotoCreateService
 {
-    private readonly PhotoFactory $photoFactory;
     private readonly PhotoRepository $photoRepository;
+    private readonly PhotoFactory $photoFactory;
 
     public function __construct(
-        PhotoFactory    $photoFactory,
         PhotoRepository $photoRepository,
+        PhotoFactory    $photoFactory,
     )
     {
-        $this->photoFactory = $photoFactory;
         $this->photoRepository = $photoRepository;
+        $this->photoFactory = $photoFactory;
     }
 
     public function handle(Request $request, Album $album): Photo
