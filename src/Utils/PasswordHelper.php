@@ -8,9 +8,9 @@ class PasswordHelper
 {
     private readonly PasswordValidator $passwordValidator;
 
-    public function __construct()
+    public function __construct(PasswordValidator $passwordValidator)
     {
-        $this->passwordValidator = new PasswordValidator();
+        $this->passwordValidator = $passwordValidator;
     }
 
     public function hash(string $newPassword): string
