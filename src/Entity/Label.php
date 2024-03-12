@@ -11,12 +11,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: LabelRepository::class)]
 class Label
 {
+    #[Groups(['labels'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups('photos')]
+    #[Groups(['labels', 'photos'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
