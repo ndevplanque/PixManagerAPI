@@ -6,7 +6,6 @@ use App\Entity\Label;
 use App\Factory\LabelFactory;
 use App\Repository\LabelRepository;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LabelCreateService
 {

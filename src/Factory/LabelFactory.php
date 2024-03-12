@@ -3,7 +3,6 @@
 namespace App\Factory;
 
 use App\Entity\Label;
-use App\Repository\LabelRepository;
 use App\Validator\PayloadValidator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;

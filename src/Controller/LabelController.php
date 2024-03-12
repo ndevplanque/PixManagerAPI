@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Label;
 use App\Service\Label\LabelCreateService;
 use App\Service\Label\LabelDeleteService;
 use App\Service\Label\LabelListingService;

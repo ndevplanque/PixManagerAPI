@@ -2,10 +2,8 @@
 
 namespace App\Service\Label;
 
-use App\Entity\Label;
 use App\Repository\LabelRepository;
 use App\Response\LabelListingResponse;
-use Symfony\Component\HttpFoundation\Request;
 
 class LabelListingService
 {
