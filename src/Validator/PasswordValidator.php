@@ -23,6 +23,6 @@ class PasswordValidator
             );
         }
 
-       return password_hash($newPassword, PASSWORD_BCRYPT);
+       return $newPassword;
     }
 }
