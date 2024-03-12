@@ -49,13 +49,13 @@ class LabelController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/api/labels/{id}', name: 'deletePhoto', methods: ['DELETE'])]
+    #[Route('/api/labels', name: 'deleteLabel', methods: ['DELETE'])]
     public function deleteLabel(
-        Label              $label,
+        Request            $request,
         LabelDeleteService $labelDeleteService,
     ): JsonResponse
     {
-        $labelDeleteService->handle($label);
+        $labelDeleteService->handle($request);
 
         return $this->jsonHelper->noContent();
     }

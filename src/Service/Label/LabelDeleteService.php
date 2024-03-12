@@ -2,9 +2,9 @@
 
 namespace App\Service\Label;
 
-use App\Entity\Label;
 use App\Repository\LabelRepository;
 use Exception;
+use Symfony\Component\HttpFoundation\Request;
 
 class LabelDeleteService
 {
@@ -18,8 +18,12 @@ class LabelDeleteService
     /**
      * @throws Exception
      */
-    public function handle(Label $label): void
+    public function handle(Request $request): void
     {
-        $this->labelRepository->delete($label);
+        $payload = $request->toArray();
+
+        $this->labelRepository->delete(
+            $this->labelRepository->findOneBy(['name' => $payload['name']])
+        );
     }
 }
