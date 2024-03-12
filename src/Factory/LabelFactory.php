@@ -19,17 +19,11 @@ class LabelFactory
     public function fromRequest(Request $request): Label
     {
         $payload = $request->toArray();
-        $this->validate($payload);
-        return new Label($payload['name']);
-    }
 
-    /**
-     * @throws HttpException
-     */
-    private function validate(array $payload): void
-    {
         $this->payloadValidator->hasKeys($payload, [
             'name',
         ]);
+
+        return new Label($payload['name']);
     }
 }

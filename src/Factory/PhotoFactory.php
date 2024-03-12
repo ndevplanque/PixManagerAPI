@@ -3,6 +3,7 @@
 namespace App\Factory;
 
 use App\Entity\Album;
+use App\Entity\Label;
 use App\Entity\Photo;
 use App\Repository\LabelRepository;
 use App\Validator\PayloadValidator;
@@ -26,29 +27,24 @@ class PhotoFactory
     public function fromRequestAndAlbum(Request $request, Album $album): Photo
     {
         $payload = $request->toArray();
-        $this->validate($payload);
+
+        $this->payloadValidator->hasKeys($payload, [
+            'name',
+            'labels',
+        ]);
 
         $photo = $album->newPhoto($payload['name']);
 
         for ($i = 0; $i < count($payload['labels']); $i++) {
             $label = $this->labelRepository->findOneBy(['name' => $payload['labels'][$i]]);
-            if ($label === null) {
-                $label = $this->labelRepository->insert($payload['labels'][$i]);
+            if ($label !== null) {
+                $photo->addLabel($label);
+            } else {
+                $created = $this->labelRepository->insert(new Label($payload['labels'][$i]));
+                $photo->addLabel($created);
             }
-            $photo->addLabel($label);
         }
 
         return $photo;
-    }
-
-    /**
-     * @throws HttpException
-     */
-    private function validate(array $payload): void
-    {
-        $this->payloadValidator->hasKeys($payload, [
-            'name',
-            'labels',
-        ]);
     }
 }
