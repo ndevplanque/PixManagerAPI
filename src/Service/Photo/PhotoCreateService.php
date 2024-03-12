@@ -3,29 +3,26 @@
 namespace App\Service\Photo;
 
 use App\Entity\Album;
-use App\Entity\Photo;
 use App\Factory\PhotoFactory;
 use App\Repository\PhotoRepository;
+use App\Response\PhotoResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class PhotoCreateService
 {
-    private readonly PhotoRepository $photoRepository;
-    private readonly PhotoFactory $photoFactory;
-
     public function __construct(
-        PhotoRepository $photoRepository,
-        PhotoFactory    $photoFactory,
+        private readonly PhotoRepository $photoRepository,
+        private readonly PhotoFactory    $photoFactory,
     )
     {
-        $this->photoRepository = $photoRepository;
-        $this->photoFactory = $photoFactory;
     }
 
-    public function handle(Request $request, Album $album): Photo
+    public function handle(Request $request, Album $album): PhotoResponse
     {
-        $photo = $this->photoFactory->fromRequestAndAlbum($request, $album);
+        $photo = $this->photoRepository->insert(
+            $this->photoFactory->fromRequestAndAlbum($request, $album)
+        );
 
-        return $this->photoRepository->insert($photo);
+        return new PhotoResponse($photo);
     }
 }

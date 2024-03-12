@@ -35,11 +35,12 @@ class Photo
     private ?Album $album = null;
 
     /** @deprecated use Album::newPhoto() */
-    public function __construct(string $name = null)
+    public function __construct(string $name = null, Album $album = null)
     {
         $this->created_at = new DateTimeImmutable();
         $this->labels = new ArrayCollection();
         $this->name = $name;
+        $this->album = $album;
     }
 
     public function getId(): ?int
@@ -88,6 +89,24 @@ class Photo
             $label->removePhoto($this);
         }
 
+        return $this;
+    }
+
+    /**
+     * @param string[] $names
+     */
+    public function removeLabelsByName(array $names): static
+    {
+        /** @var Label[] $labels */
+        $labels = $this->getLabels()->getValues();
+        for ($i = 0; $i < count($names); $i++) {
+            foreach ($labels as $label) {
+                if ($label->getName() === $names[$i]) {
+                    $this->removeLabel($label);
+                    break;
+                }
+            }
+        }
         return $this;
     }
 
