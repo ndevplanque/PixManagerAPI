@@ -6,6 +6,7 @@ use App\Entity\Album;
 use App\Entity\Photo;
 use App\Factory\PhotoFactory;
 use App\Repository\PhotoRepository;
+use App\Response\PhotoResponse;
 use App\Service\Photo\PhotoCreateService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,6 +42,6 @@ class PhotoCreateServiceTest extends TestCase
             ->with($photo)
             ->willReturn($photo);
 
-        $this->assertSame($photo, $this->service->handle($request, $album));
+        $this->assertEquals(new PhotoResponse($photo), $this->service->handle($request, $album));
     }
 }
