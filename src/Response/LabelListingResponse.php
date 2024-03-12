@@ -16,7 +16,11 @@ class LabelListingResponse implements JsonSerializable
 
     public function jsonSerialize(): array
     {
-        return array_map(fn(Label $label) => $label->getName(), $this->items);
+        return [
+            'labels' => array_map(function (Label $label) {
+                return $label->getName();
+            }, $this->items),
+        ];
     }
 
 }

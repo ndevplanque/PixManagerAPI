@@ -16,7 +16,7 @@ class LabelListingResponseTest extends TestCase
             $this->createConfiguredMock(Label::class, ['getName' => 'macron']),
         ]);
 
-        $expected = ['chien', 'chat', 'macron'];
+        $expected = ['labels' => ['chien', 'chat', 'macron']];
 
         $this->assertEquals($expected, $response->jsonSerialize());
     }

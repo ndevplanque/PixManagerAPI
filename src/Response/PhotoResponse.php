@@ -16,6 +16,8 @@ class PhotoResponse implements JsonSerializable
 
     public function jsonSerialize(): array
     {
+        $labelListingResponse = new LabelListingResponse($this->photo->getLabels()->getValues());
+
         return [
             'id' => $this->photo->getId(),
             'name' => $this->photo->getName(),
@@ -23,7 +25,7 @@ class PhotoResponse implements JsonSerializable
                 'id' => $this->photo->getAlbum()->getId(),
                 'name' => $this->photo->getAlbum()->getName(),
             ],
-            'labels' => new LabelListingResponse($this->photo->getLabels()->getValues()),
+            'labels' => $labelListingResponse->jsonSerialize()['labels'],
             'createdAt' => $this->photo->getCreatedAt()->format(DateTimeInterface::RFC3339),
         ];
     }
