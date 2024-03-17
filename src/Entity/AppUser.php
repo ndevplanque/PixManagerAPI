@@ -13,13 +13,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: AppUserRepository::class)]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups('users')]
+    #[Groups(['users','shared'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups('users')]
+    #[Groups(['users', 'albums','shared'])]
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
