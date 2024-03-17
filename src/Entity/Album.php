@@ -14,28 +14,31 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: AlbumRepository::class)]
 class Album
 {
-    #[Groups('users')]
+    #[Groups(['users', 'albums'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups('users')]
+    #[Groups(['users', 'albums', 'shared'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
     #[Groups('users')]
     #[ORM\Column]
-    private ?DateTimeImmutable $created_at = null;
+    private DateTimeImmutable $created_at;
 
+    #[Groups('shared')]
     #[ORM\ManyToMany(targetEntity: AppUser::class, mappedBy: 'shared_albums')]
     private Collection $shared_to;
 
     #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'album', cascade: ['persist'], orphanRemoval: true)]
     private Collection $photos;
 
-    #[ORM\ManyToOne(inversedBy: 'albums')]
+
+    #[ORM\ManyToOne(targetEntity: AppUser::class, cascade: ["persist"], inversedBy: 'albums')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['albums'])]
     private ?AppUser $owner = null;
 
     /** @deprecated use AppUser::newAlbum() */
@@ -67,6 +70,10 @@ class Album
     {
         return $this->created_at;
     }
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new DateTimeImmutable();
+    }
 
     /**
      * @return Collection<int, AppUser>
@@ -90,6 +97,7 @@ class Album
     {
         if ($this->shared_to->removeElement($sharedTo)) {
             $sharedTo->removeSharedAlbum($this);
+
         }
 
         return $this;
