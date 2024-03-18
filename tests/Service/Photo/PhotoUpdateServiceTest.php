@@ -17,16 +17,16 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class PhotoUpdateServiceTest extends TestCase
 {
     private readonly PhotoUpdateService $service;
-    private readonly LabelRepository $labelRepository;
     private readonly PhotoRepository $photoRepository;
     private readonly AlbumRepository $albumRepository;
+    private readonly LabelRepository $labelRepository;
 
     public function setUp(): void
     {
         $this->service = new PhotoUpdateService(
-            $this->labelRepository = $this->createMock(LabelRepository::class),
             $this->photoRepository = $this->createMock(PhotoRepository::class),
             $this->albumRepository = $this->createMock(AlbumRepository::class),
+            $this->labelRepository = $this->createMock(LabelRepository::class),
         );
     }
 
@@ -35,6 +35,7 @@ class PhotoUpdateServiceTest extends TestCase
         $request = $this->createConfiguredMock(Request::class, [
             'toArray' => ['albumId' => $albumId = 123],
         ]);
+
         $photo = $this->createMock(Photo::class);
 
         $this->albumRepository
@@ -54,6 +55,7 @@ class PhotoUpdateServiceTest extends TestCase
         $request = $this->createConfiguredMock(Request::class, [
             'toArray' => ['albumId' => $albumId = 123],
         ]);
+
         $photo = $this->createConfiguredMock(Photo::class, [
             'getAlbum' => $this->createConfiguredMock(Album::class, [
                 'getOwner' => $this->createMock(AppUser::class),

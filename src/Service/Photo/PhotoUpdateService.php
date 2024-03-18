@@ -12,9 +12,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class PhotoUpdateService
 {
     public function __construct(
-        private readonly LabelRepository $labelRepository,
         private readonly PhotoRepository $photoRepository,
         private readonly AlbumRepository $albumRepository,
+        private readonly LabelRepository $labelRepository,
     )
     {
     }
