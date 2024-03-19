@@ -7,7 +7,7 @@ use App\Factory\PhotoFactory;
 use App\Repository\PhotoRepository;
 use App\Response\PhotoResponse;
 use App\Utils\FileHelper;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use App\Utils\RequestHelper;
 use Symfony\Component\HttpFoundation\Request;
 
 class PhotoCreateService
@@ -16,6 +16,7 @@ class PhotoCreateService
         private readonly PhotoRepository $photoRepository,
         private readonly PhotoFactory    $photoFactory,
         private readonly FileHelper      $fileHelper,
+        private readonly RequestHelper   $requestHelper,
     )
     {
     }
@@ -26,10 +27,10 @@ class PhotoCreateService
             $this->photoFactory->fromRequestAndAlbum($request, $album)
         );
 
-        /** @var UploadedFile $uploaded */
-        $uploaded = $request->files->get('file');
-
-        $this->fileHelper->storeUploadedPhotoFile($photo, $uploaded);
+        $this->fileHelper->storeUploadedPhotoFile(
+            $photo,
+            $this->requestHelper->getUploadedFile($request, 'file')
+        );
 
         return new PhotoResponse($photo);
     }

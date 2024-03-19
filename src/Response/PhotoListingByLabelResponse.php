@@ -4,7 +4,7 @@ namespace App\Response;
 
 use JsonSerializable;
 
-class PhotoListingResponse implements JsonSerializable
+class PhotoListingByLabelResponse implements JsonSerializable
 {
     /** @param PhotoResponse[] $items */
     public function __construct(

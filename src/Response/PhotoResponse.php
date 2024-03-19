@@ -21,6 +21,7 @@ class PhotoResponse implements JsonSerializable
         return [
             'id' => $this->photo->getId(),
             'name' => $this->photo->getName(),
+            'ownerId' => $this->photo->getOwner()->getId(),
             'album' => [
                 'id' => $this->photo->getAlbum()->getId(),
                 'name' => $this->photo->getAlbum()->getName(),

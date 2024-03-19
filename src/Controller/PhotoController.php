@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Album;
 use App\Entity\AppUser;
+use App\Entity\Label;
 use App\Entity\Photo;
 use App\Service\Photo\PhotoCreateService;
 use App\Service\Photo\PhotoDeleteService;
 use App\Service\Photo\PhotoListingByAlbumService;
+use App\Service\Photo\PhotoListingByLabelService;
 use App\Service\Photo\PhotoListingByUserService;
 use App\Service\Photo\PhotoUpdateService;
 use App\Utils\FileHelper;
@@ -18,7 +20,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 
 class PhotoController extends AbstractController
 {
@@ -29,63 +30,86 @@ class PhotoController extends AbstractController
     {
     }
 
-    #[Route('/api/photos/albums/{id}', name: 'listPhotosByAlbum', methods: ['GET'])]
-    public function listPhotosByAlbum(
+    #[Route('/api/photos/albums/{id}', name: 'listPhotosByAlbumId', methods: ['GET'])]
+    public function listPhotosByAlbumId(
         Album                      $album,
         PhotoListingByAlbumService $photoListingByAlbumService,
-        SerializerInterface        $serializer,
     ): JsonResponse
     {
         $user = $album->getOwner();
         // todo: security check -> requester should be $user
-        $photos = $photoListingByAlbumService->handle($album);
-        $json = $serializer->serialize($photos, 'json', ['groups' => ['photos']]);
-        return $this->jsonHelper->send($json);
+
+        $listingByAlbumResponse = $photoListingByAlbumService->handle($album);
+
+        return $this->jsonHelper->send(
+            json_encode($listingByAlbumResponse->jsonSerialize())
+        );
     }
 
     /**
      * @throws Exception
      */
-    #[Route('/api/photos/users/{id}', name: 'listPhotosByUser', methods: ['GET'])]
-    public function listPhotosByUser(
+    #[Route('/api/photos/users/{id}', name: 'listPhotosByUserId', methods: ['GET'])]
+    public function listPhotosByUserId(
         AppUser                   $user,
         PhotoListingByUserService $photoListingByUserService,
-        SerializerInterface       $serializer,
     ): JsonResponse
     {
         // todo: security check -> requester should be $user
-        $photos = $photoListingByUserService->handle($user);
-        $json = $serializer->serialize($photos, 'json', ['groups' => ['photos']]);
-        return $this->jsonHelper->send($json);
+        $listingByUserResponse = $photoListingByUserService->handle($user);
+
+        return $this->jsonHelper->send(
+            json_encode($listingByUserResponse->jsonSerialize())
+        );
+    }
+
+    #[Route('/api/photos/labels/{id}', name: 'listPhotosByLabelId', methods: ['GET'])]
+    public function listPhotosByLabelId(
+        Label                      $label,
+        PhotoListingByLabelService $photoListingByLabelService,
+    ): JsonResponse
+    {
+        // todo: security check -> requester should be $user
+
+        $listingByLabelResponse = $photoListingByLabelService->handle($label);
+
+        return $this->jsonHelper->send(
+            json_encode($listingByLabelResponse->jsonSerialize())
+        );
     }
 
     #[Route('/api/photos/albums/{id}', name: "createPhoto", methods: ['POST'])]
     public function createPhoto(
-        Request             $request,
-        Album               $album,
-        PhotoCreateService  $photoCreateService,
+        Request            $request,
+        Album              $album,
+        PhotoCreateService $photoCreateService,
     ): JsonResponse
     {
         $user = $album->getOwner();
         // todo: security check -> requester should be $user
-        $photo = $photoCreateService->handle($request, $album);
-        $json = json_encode($photo->jsonSerialize());
-        return $this->jsonHelper->created($json);
+
+        $photoResponse = $photoCreateService->handle($request, $album);
+
+        return $this->jsonHelper->created(
+            json_encode($photoResponse->jsonSerialize())
+        );
     }
 
     #[Route('/api/photos/{id}', name: "updatePhoto", methods: ['PUT'])]
     public function updatePhoto(
-        Request             $request,
-        Photo               $photo,
-        PhotoUpdateService  $photoUpdateService,
-        SerializerInterface $serializer,
+        Request            $request,
+        Photo              $photo,
+        PhotoUpdateService $photoUpdateService,
     ): JsonResponse
     {
         $user = $photo->getOwner();
         // todo: security check -> requester should be $user
-        $photo = $photoUpdateService->handle($request, $photo);
-        $json = $serializer->serialize($photo, 'json', ['groups' => 'photos']);
-        return $this->jsonHelper->created($json);
+
+        $photoResponse = $photoUpdateService->handle($request, $photo);
+
+        return $this->jsonHelper->created(
+            json_encode($photoResponse->jsonSerialize())
+        );
     }
 
     /**
@@ -98,6 +122,7 @@ class PhotoController extends AbstractController
     ): JsonResponse
     {
         $photoDeleteService->handle($photo);
+
         return $this->jsonHelper->noContent();
     }
 
@@ -107,6 +132,6 @@ class PhotoController extends AbstractController
     ): BinaryFileResponse
     {
         // todo: check that this user does owns the photo or it belongs to a shared album
-       return $this->fileHelper->sendPhoto($photo);
+        return $this->fileHelper->sendPhoto($photo);
     }
 }

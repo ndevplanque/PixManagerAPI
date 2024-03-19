@@ -9,6 +9,7 @@ use App\Entity\Photo;
 use App\Repository\AlbumRepository;
 use App\Repository\LabelRepository;
 use App\Repository\PhotoRepository;
+use App\Response\PhotoResponse;
 use App\Service\Photo\PhotoUpdateService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -142,6 +143,9 @@ class PhotoUpdateServiceTest extends TestCase
             ->with($photo)
             ->willReturn($photo);
 
-        $this->assertSame($photo, $this->service->handle($request, $photo));
+        $this->assertEquals(
+            new PhotoResponse($photo),
+            $this->service->handle($request, $photo)
+        );
     }
 }

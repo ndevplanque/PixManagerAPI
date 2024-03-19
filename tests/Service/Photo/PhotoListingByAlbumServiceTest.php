@@ -4,6 +4,8 @@ namespace Tests\App\Service\Photo;
 
 use App\Entity\Album;
 use App\Entity\Photo;
+use App\Response\PhotoListingByAlbumResponse;
+use App\Response\PhotoResponse;
 use App\Service\Photo\PhotoListingByAlbumService;
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
@@ -19,21 +21,20 @@ class PhotoListingByAlbumServiceTest extends TestCase
 
     public function testHandle(): void
     {
-        $album = $this->createMock(Album::class);
+        $album = $this->createConfiguredMock(Album::class, [
+            'getPhotos' => $this->createConfiguredMock(Collection::class, [
+                'getValues' => [
+                    $photo1 = $this->createMock(Photo::class),
+                    $photo2 = $this->createMock(Photo::class),
+                ]
+            ])
+        ]);
 
-        $album
-            ->expects($this->once())
-            ->method('getPhotos')
-            ->willReturn($collection = $this->createMock(Collection::class));
+        $expected = new PhotoListingByAlbumResponse([
+            new PhotoResponse($photo1),
+            new PhotoResponse($photo2),
+        ]);
 
-        $collection
-            ->expects($this->once())
-            ->method('getValues')
-            ->willReturn($photos = [
-                $this->createMock(Photo::class),
-                $this->createMock(Photo::class),
-            ]);
-
-        $this->assertSame($photos, $this->service->handle($album));
+        $this->assertEquals($expected, $this->service->handle($album));
     }
 }

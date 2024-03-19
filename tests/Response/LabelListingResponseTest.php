@@ -11,12 +11,25 @@ class LabelListingResponseTest extends TestCase
     public function testJsonSerialize(): void
     {
         $response = new LabelListingResponse([
-            $this->createConfiguredMock(Label::class, ['getName' => 'chien']),
-            $this->createConfiguredMock(Label::class, ['getName' => 'chat']),
-            $this->createConfiguredMock(Label::class, ['getName' => 'macron']),
+            $this->createConfiguredMock(Label::class, [
+                'getId' => 1,
+                'getName' => 'chien',
+            ]),
+            $this->createConfiguredMock(Label::class, [
+                'getId' => 2,
+                'getName' => 'chat',
+            ]),
+            $this->createConfiguredMock(Label::class, [
+                'getId' => 3,
+                'getName' => 'macron',
+            ]),
         ]);
 
-        $expected = ['labels' => ['chien', 'chat', 'macron']];
+        $expected = ['labels' => [
+            ['id' => 1, 'name' => 'chien'],
+            ['id' => 2, 'name' => 'chat'],
+            ['id' => 3, 'name' => 'macron'],
+        ]];
 
         $this->assertEquals($expected, $response->jsonSerialize());
     }

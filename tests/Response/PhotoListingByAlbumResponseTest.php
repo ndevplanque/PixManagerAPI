@@ -2,15 +2,15 @@
 
 namespace Tests\App\Response;
 
-use App\Response\PhotoListingResponse;
+use App\Response\PhotoListingByAlbumResponse;
 use App\Response\PhotoResponse;
 use PHPUnit\Framework\TestCase;
 
-class PhotoListingResponseTest extends TestCase
+class PhotoListingByAlbumResponseTest extends TestCase
 {
     public function testJsonSerialize(): void
     {
-        $response = new PhotoListingResponse([
+        $response = new PhotoListingByAlbumResponse([
             $photo1 = $this->createMock(PhotoResponse::class),
             $photo2 = $this->createMock(PhotoResponse::class),
             $photo3 = $this->createMock(PhotoResponse::class),

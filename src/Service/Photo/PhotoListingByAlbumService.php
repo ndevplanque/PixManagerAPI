@@ -3,13 +3,19 @@
 namespace App\Service\Photo;
 
 use App\Entity\Album;
-use App\Entity\Label;
+use App\Entity\Photo;
+use App\Response\PhotoListingByAlbumResponse;
+use App\Response\PhotoResponse;
 
 class PhotoListingByAlbumService
 {
-    /** @return Label[] */
-    public function handle(Album $album): array
+    public function handle(Album $album): PhotoListingByAlbumResponse
     {
-        return $album->getPhotos()->getValues();
+        return new PhotoListingByAlbumResponse(
+            array_map(
+                fn(Photo $photo) => new PhotoResponse($photo),
+                $album->getPhotos()->getValues()
+            )
+        );
     }
 }

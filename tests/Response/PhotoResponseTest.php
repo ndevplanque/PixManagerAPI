@@ -3,11 +3,11 @@
 namespace Tests\App\Response;
 
 use App\Entity\Album;
+use App\Entity\AppUser;
 use App\Entity\Label;
 use App\Entity\Photo;
 use App\Response\PhotoResponse;
 use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
 
@@ -22,13 +22,18 @@ class PhotoResponseTest extends TestCase
                 'getId' => $albumId = 5,
                 'getName' => $albumName = 'Chats',
             ]),
+            'getOwner' => $this->createConfiguredMock(AppUser::class, [
+                'getId' => $ownerId = 123,
+            ]),
             'getLabels' => $this->createConfiguredMock(Collection::class, [
                 'getValues' => [
                     $this->createConfiguredMock(Label::class, [
-                        'getName' => $label1 = 'chat',
+                        'getId' => $label1Id = 1,
+                        'getName' => $label1Name = 'chat',
                     ]),
                     $this->createConfiguredMock(Label::class, [
-                        'getName' => $label2 = 'Michel',
+                        'getId' => $label2Id = 2,
+                        'getName' => $label2Name = 'Michel',
                     ]),
                 ]
             ]),
@@ -37,8 +42,6 @@ class PhotoResponseTest extends TestCase
             ]),
         ]);
 
-        $response = new PhotoResponse($photo);
-
         $expected = [
             'id' => $id,
             'name' => $name,
@@ -46,10 +49,14 @@ class PhotoResponseTest extends TestCase
                 'id' => $albumId,
                 'name' => $albumName,
             ],
-            'labels' => [$label1, $label2],
+            'ownerId' => $ownerId,
+            'labels' => [
+                ['id' => $label1Id, 'name' => $label1Name],
+                ['id' => $label2Id, 'name' => $label2Name],
+            ],
             'createdAt' => $date,
         ];
 
-        $this->assertEquals($expected, $response->jsonSerialize());
+        $this->assertEquals($expected, (new PhotoResponse($photo))->jsonSerialize());
     }
 }

@@ -5,13 +5,14 @@ namespace App\Factory;
 use App\Entity\Album;
 use App\Entity\Photo;
 use App\Repository\LabelRepository;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use App\Utils\RequestHelper;
 use Symfony\Component\HttpFoundation\Request;
 
 class PhotoFactory
 {
     public function __construct(
-        private readonly LabelRepository  $labelRepository,
+        private readonly LabelRepository $labelRepository,
+        private readonly RequestHelper   $requestHelper,
     )
     {
     }
@@ -19,11 +20,10 @@ class PhotoFactory
     public function fromRequestAndAlbum(Request $request, Album $album): Photo
     {
         $labels = json_decode(
-            $request->request->get('labels')
+            $this->requestHelper->getParameter($request, 'labels')
         );
 
-        /** @var UploadedFile $file */
-        $file = $request->files->get('file');
+        $file = $this->requestHelper->getUploadedFile($request, 'file');
 
         //todo: get the owner from jwt instead
         $owner = $album->getOwner();

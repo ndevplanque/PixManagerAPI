@@ -2,27 +2,24 @@
 
 namespace App\Service\Photo;
 
-use App\Entity\Album;
 use App\Entity\AppUser;
 use App\Entity\Photo;
+use App\Response\PhotoListingByUserResponse;
+use App\Response\PhotoResponse;
 use Exception;
 
 class PhotoListingByUserService
 {
     /**
-     * @return Photo[]
      * @throws Exception
      */
-    public function handle(AppUser $user): array
+    public function handle(AppUser $user): PhotoListingByUserResponse
     {
-        $albums = $user->getOwnedAlbums()->getIterator();
-        $photos = [];
-
-        foreach ($albums as $album) {
-            /** @var Album $album */
-            $photos = array_merge($photos, $album->getPhotos()->getValues());
-        }
-
-        return $photos;
+        return new PhotoListingByUserResponse(
+            array_map(
+                fn(Photo $photo) => new PhotoResponse($photo),
+                $user->getPhotos()->getValues()
+            )
+        );
     }
 }

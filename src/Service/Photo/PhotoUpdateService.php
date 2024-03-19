@@ -6,6 +6,7 @@ use App\Entity\Photo;
 use App\Repository\AlbumRepository;
 use App\Repository\LabelRepository;
 use App\Repository\PhotoRepository;
+use App\Response\PhotoResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -19,7 +20,7 @@ class PhotoUpdateService
     {
     }
 
-    public function handle(Request $request, Photo $photo): Photo
+    public function handle(Request $request, Photo $photo): PhotoResponse
     {
         $payload = $request->toArray();
 
@@ -53,6 +54,6 @@ class PhotoUpdateService
             $photo->setAlbum($album);
         }
 
-        return $this->photoRepository->update($photo);
+        return new PhotoResponse($this->photoRepository->update($photo));
     }
 }
