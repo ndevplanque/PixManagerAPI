@@ -34,13 +34,16 @@ class Photo
     #[ORM\JoinColumn(nullable: false)]
     private ?Album $album = null;
 
-    /** @deprecated use Album::newPhoto() */
-    public function __construct(string $name = null, Album $album = null)
+    #[ORM\ManyToOne(inversedBy: 'photos')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?AppUser $owner = null;
+
+    /** @deprecated use AppUser::newPhoto() */
+    public function __construct(string $name = null)
     {
         $this->created_at = new DateTimeImmutable();
         $this->labels = new ArrayCollection();
         $this->name = $name;
-        $this->album = $album;
     }
 
     public function getId(): ?int
@@ -118,6 +121,18 @@ class Photo
     public function setAlbum(?Album $album): static
     {
         $this->album = $album;
+
+        return $this;
+    }
+
+    public function getOwner(): ?AppUser
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?AppUser $owner): static
+    {
+        $this->owner = $owner;
 
         return $this;
     }

@@ -39,7 +39,7 @@ class AppFixtures extends Fixture
         // create photos
         for ($i = 0; $i < count(PHOTOS); $i++) {
             $user = $manager->getRepository(AppUser::class)->findOneBy(['email' => PHOTOS[$i]['email']]);
-            $photo = $user->getOwnedAlbums()->first()->newPhoto(PHOTOS[$i]['name']);
+            $photo = $user->newPhoto(PHOTOS[$i]['name']);
 
             $labels = PHOTOS[$i]['labels'];
             for ($j = 0; $j < count($labels); $j++) {

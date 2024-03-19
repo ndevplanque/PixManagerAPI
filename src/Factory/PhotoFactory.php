@@ -5,32 +5,34 @@ namespace App\Factory;
 use App\Entity\Album;
 use App\Entity\Photo;
 use App\Repository\LabelRepository;
-use App\Validator\PayloadValidator;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
 class PhotoFactory
 {
     public function __construct(
         private readonly LabelRepository  $labelRepository,
-        private readonly PayloadValidator $payloadValidator,
     )
     {
     }
 
     public function fromRequestAndAlbum(Request $request, Album $album): Photo
     {
-        $payload = $request->toArray();
+        $labels = json_decode(
+            $request->request->get('labels')
+        );
 
-        $this->payloadValidator->hasKeys($payload, [
-            'name',
-            'labels',
-        ]);
+        /** @var UploadedFile $file */
+        $file = $request->files->get('file');
 
-        $photo = $album->newPhoto($payload['name']);
+        //todo: get the owner from jwt instead
+        $owner = $album->getOwner();
 
-        for ($i = 0; $i < count($payload['labels']); $i++) {
+        $photo = $owner->newPhoto($file->getClientOriginalName(), $album);
+
+        for ($i = 0; $i < count($labels); $i++) {
             $photo->addLabel(
-                $this->labelRepository->findOrInsert($payload['labels'][$i])
+                $this->labelRepository->findOrInsert($labels[$i])
             );
         }
 

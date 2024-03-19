@@ -8,7 +8,9 @@ use App\Factory\PhotoFactory;
 use App\Repository\PhotoRepository;
 use App\Response\PhotoResponse;
 use App\Service\Photo\PhotoCreateService;
+use App\Utils\FileHelper;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
 class PhotoCreateServiceTest extends TestCase
@@ -16,12 +18,14 @@ class PhotoCreateServiceTest extends TestCase
     private readonly PhotoCreateService $service;
     private readonly PhotoRepository $photoRepository;
     private readonly PhotoFactory $photoFactory;
+    private readonly FileHelper $fileHelper;
 
     public function setUp(): void
     {
         $this->service = new PhotoCreateService(
             $this->photoRepository = $this->createMock(PhotoRepository::class),
             $this->photoFactory = $this->createMock(PhotoFactory::class),
+            $this->fileHelper = $this->createMock(FileHelper::class),
         );
     }
 
@@ -41,6 +45,11 @@ class PhotoCreateServiceTest extends TestCase
             ->method('insert')
             ->with($photo)
             ->willReturn($photo);
+
+        $this->fileHelper
+            ->expects($this->once())
+            ->method('storeUploadedPhotoFile')
+            ->with($photo, $this->createMock(UploadedFile::class));
 
         $this->assertEquals(new PhotoResponse($photo), $this->service->handle($request, $album));
     }

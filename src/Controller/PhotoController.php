@@ -10,9 +10,11 @@ use App\Service\Photo\PhotoDeleteService;
 use App\Service\Photo\PhotoListingByAlbumService;
 use App\Service\Photo\PhotoListingByUserService;
 use App\Service\Photo\PhotoUpdateService;
+use App\Utils\FileHelper;
 use App\Utils\JsonHelper;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,11 +24,12 @@ class PhotoController extends AbstractController
 {
     public function __construct(
         private readonly JsonHelper $jsonHelper,
+        private readonly FileHelper $fileHelper,
     )
     {
     }
 
-    #[Route('/api/albums/{id}/photos', name: 'listPhotosByAlbum', methods: ['GET'])]
+    #[Route('/api/photos/albums/{id}', name: 'listPhotosByAlbum', methods: ['GET'])]
     public function listPhotosByAlbum(
         Album                      $album,
         PhotoListingByAlbumService $photoListingByAlbumService,
@@ -43,7 +46,7 @@ class PhotoController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/api/users/{id}/photos', name: 'listPhotosByUser', methods: ['GET'])]
+    #[Route('/api/photos/users/{id}', name: 'listPhotosByUser', methods: ['GET'])]
     public function listPhotosByUser(
         AppUser                   $user,
         PhotoListingByUserService $photoListingByUserService,
@@ -56,12 +59,11 @@ class PhotoController extends AbstractController
         return $this->jsonHelper->send($json);
     }
 
-    #[Route('/api/albums/{id}/photos', name: "createPhoto", methods: ['POST'])]
+    #[Route('/api/photos/albums/{id}', name: "createPhoto", methods: ['POST'])]
     public function createPhoto(
         Request             $request,
         Album               $album,
         PhotoCreateService  $photoCreateService,
-        SerializerInterface $serializer,
     ): JsonResponse
     {
         $user = $album->getOwner();
@@ -79,7 +81,7 @@ class PhotoController extends AbstractController
         SerializerInterface $serializer,
     ): JsonResponse
     {
-        $user = $photo->getAlbum()->getOwner();
+        $user = $photo->getOwner();
         // todo: security check -> requester should be $user
         $photo = $photoUpdateService->handle($request, $photo);
         $json = $serializer->serialize($photo, 'json', ['groups' => 'photos']);
@@ -97,5 +99,14 @@ class PhotoController extends AbstractController
     {
         $photoDeleteService->handle($photo);
         return $this->jsonHelper->noContent();
+    }
+
+    #[Route('/api/photos/{id}', name: 'getPhotoFile', methods: ['GET'])]
+    public function getPhotoFile(
+        Photo $photo
+    ): BinaryFileResponse
+    {
+        // todo: check that this user does owns the photo or it belongs to a shared album
+       return $this->fileHelper->sendPhoto($photo);
     }
 }

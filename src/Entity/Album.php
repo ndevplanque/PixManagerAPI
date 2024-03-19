@@ -134,11 +134,4 @@ class Album
 
         return $this;
     }
-
-    public function newPhoto(string $name = null): Photo
-    {
-        $this->addPhoto($photo = new Photo($name));
-        $photo->setAlbum($this);
-        return $photo;
-    }
 }
