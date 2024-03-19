@@ -55,50 +55,38 @@ class AppFixtures extends Fixture
 
 const PHOTOS = [
     [
-        'name' => 'macron.jpg',
-        'labels' => ['macron'],
-        'email' => 'macron@demission.fr',
+        'name' => 'chat mignon à la maison.jpg',
+        'labels' => ['cats', 'cute', 'at_home'],
+        'email' => 'dev@team.fr',
     ],
     [
-        'name' => 'brigitte.jpg',
-        'labels' => ['chien'],
-        'email' => 'macron@demission.fr',
+        'name' => 'fratrie de chats mignons dehors.jpg',
+        'labels' => ['cats', 'outdoors', 'cute'],
+        'email' => 'dev@team.fr',
+    ],
+    [
+        'name' => 'chien majestueux.jpg',
+        'labels' => ['dogs'],
+        'email' => 'dev@team.fr',
     ],
 ];
 const LABELS = [
-    ['name' => 'macron'],
-    ['name' => 'chien'],
-    ['name' => 'chat'],
-    ['name' => 'montagne'],
+    ['name' => 'cats'],
+    ['name' => 'dogs'],
+    ['name' => 'at_home'],
+    ['name' => 'cute'],
+    ['name' => 'outdoors'],
 ];
 const USERS = [
     [
-        'email' => 'macron@demission.fr',
-        'password' => 'explosion',
+        'email' => 'dev@team.fr',
+        'password' => 'azerty',
         'is_admin' => true,
         'roles' => ['ROLE_ADMIN', 'ROLE_USER'],
     ],
     [
-        'email' => 'daniel@team.fr',
-        'password' => 'explosion',
-        'is_admin' => false,
-        'roles' => ['ROLE_USER'],
-    ],
-    [
-        'email' => 'jerome@team.fr',
-        'password' => 'explosion',
-        'is_admin' => false,
-        'roles' => ['ROLE_USER'],
-    ],
-    [
-        'email' => 'sacha@team.fr',
-        'password' => 'explosion',
-        'is_admin' => false,
-        'roles' => ['ROLE_USER'],
-    ],
-    [
-        'email' => 'hurkan@team.fr',
-        'password' => 'explosion',
+        'email' => 'user@team.fr',
+        'password' => 'azerty',
         'is_admin' => false,
         'roles' => ['ROLE_USER'],
     ],

@@ -13,22 +13,22 @@ class LabelListingResponseTest extends TestCase
         $response = new LabelListingResponse([
             $this->createConfiguredMock(Label::class, [
                 'getId' => 1,
-                'getName' => 'chien',
+                'getName' => 'dogs',
             ]),
             $this->createConfiguredMock(Label::class, [
                 'getId' => 2,
-                'getName' => 'chat',
+                'getName' => 'cats',
             ]),
             $this->createConfiguredMock(Label::class, [
                 'getId' => 3,
-                'getName' => 'macron',
+                'getName' => 'cute',
             ]),
         ]);
 
         $expected = ['labels' => [
-            ['id' => 1, 'name' => 'chien'],
-            ['id' => 2, 'name' => 'chat'],
-            ['id' => 3, 'name' => 'macron'],
+            ['id' => 1, 'name' => 'dogs'],
+            ['id' => 2, 'name' => 'cats'],
+            ['id' => 3, 'name' => 'cute'],
         ]];
 
         $this->assertEquals($expected, $response->jsonSerialize());

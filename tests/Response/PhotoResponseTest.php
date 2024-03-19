@@ -29,11 +29,11 @@ class PhotoResponseTest extends TestCase
                 'getValues' => [
                     $this->createConfiguredMock(Label::class, [
                         'getId' => $label1Id = 1,
-                        'getName' => $label1Name = 'chat',
+                        'getName' => $label1Name = 'cats',
                     ]),
                     $this->createConfiguredMock(Label::class, [
                         'getId' => $label2Id = 2,
-                        'getName' => $label2Name = 'Michel',
+                        'getName' => $label2Name = 'cute',
                     ]),
                 ]
             ]),

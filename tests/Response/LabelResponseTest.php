@@ -13,11 +13,11 @@ class LabelResponseTest extends TestCase
         $response = new LabelResponse(
             $this->createConfiguredMock(Label::class, [
                 'getId' => 2,
-                'getName' => 'chat',
+                'getName' => 'cats',
             ])
         );
 
-        $this->assertEquals(['id' => 2, 'name' => 'chat'], $response->jsonSerialize());
+        $this->assertEquals(['id' => 2, 'name' => 'cats'], $response->jsonSerialize());
     }
 
 }

@@ -22,7 +22,7 @@ class LabelFactoryTest extends TestCase
     public function testFromRequest(): void
     {
         $request = $this->createConfiguredMock(Request::class, [
-            'toArray' => $payload = ['name' => 'chien'],
+            'toArray' => $payload = ['name' => 'cats'],
         ]);
 
         $this->payloadValidator

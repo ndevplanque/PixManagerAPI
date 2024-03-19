@@ -30,12 +30,12 @@ class PhotoFactoryTest extends TestCase
             ->expects($this->exactly(2))
             ->method('findOrInsert')
             ->willReturnMap([
-                ['macron', $labelMacron = $this->createMock(Label::class)],
-                ['chien', $labelChien = $this->createMock(Label::class)],
+                ['cats', $labelCats = $this->createMock(Label::class)],
+                ['dogs', $labelDogs = $this->createMock(Label::class)],
             ]);
 
-        $photo->addLabel($labelChien);
-        $photo->addLabel($labelMacron);
+        $photo->addLabel($labelCats);
+        $photo->addLabel($labelDogs);
 
         $this->assertEquals($photo, $this->factory->fromRequestAndAlbum($request, $album));
     }

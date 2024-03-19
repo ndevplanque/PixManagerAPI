@@ -82,9 +82,9 @@ class PhotoUpdateServiceTest extends TestCase
         $request = $this->createConfiguredMock(Request::class, [
             'toArray' => [
                 'albumId' => $albumId = 123,
-                'addLabels' => $addLabels = ['chien', 'chat'],
-                'removeLabels' => $removeLabels = ['soleil', 'montagne', 'paysage'],
-                'name' => $name = 'chien et chat au clair de lune',
+                'addLabels' => $addLabels = ['cute', 'cats'],
+                'removeLabels' => $removeLabels = ['sunshine', 'outdoors', 'dogs'],
+                'name' => $name = 'chats mignons.jpg',
             ],
         ]);
 
@@ -105,16 +105,16 @@ class PhotoUpdateServiceTest extends TestCase
             ->expects($this->exactly(2))
             ->method('findOrInsert')
             ->willReturnMap([
-                [$addLabels[0], $chien = $this->createMock(Label::class)],
-                [$addLabels[1], $chat = $this->createMock(Label::class)],
+                [$addLabels[0], $cute = $this->createMock(Label::class)],
+                [$addLabels[1], $cats = $this->createMock(Label::class)],
             ]);
 
         $photo
             ->expects($this->exactly(2))
             ->method('addLabel')
             ->willReturnMap([
-                [$chien, $photo],
-                [$chat, $photo],
+                [$cute, $photo],
+                [$cats, $photo],
             ]);
 
         $photo
