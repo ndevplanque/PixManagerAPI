@@ -6,8 +6,7 @@
 
 - Installer les dépendances
 ```sh
-composer require --dev symfony/maker-bundle orm-fixtures symfony/test-pack
-composer require form validator twig-bundle orm security-csrf symfony/orm-pack symfony/serializer-pack symfony/validator doctrine/annotations security
+composer install
 ```
 
 ### Base de données
