@@ -2,19 +2,32 @@
 
 namespace App\Service\Photo;
 
-use App\Entity\Label;
 use App\Entity\Photo;
+use App\Repository\LabelRepository;
 use App\Response\PhotoListingByLabelResponse;
 use App\Response\PhotoResponse;
 use Exception;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PhotoListingByLabelService
 {
+    public function __construct(
+        private readonly LabelRepository $labelRepository
+    )
+    {
+    }
+
     /**
      * @throws Exception
      */
-    public function handle(Label $label): PhotoListingByLabelResponse
+    public function handle(string $labelName): PhotoListingByLabelResponse
     {
+        $label = $this->labelRepository->findOneBy(['name' => $labelName]);
+
+        if ($label === null) {
+            throw new HttpException(404, "Label $labelName not found!");
+        }
+
         // todo: get user from jwt instead
         $user = $label->getPhotos()->first()->getOwner();
 

@@ -13,8 +13,7 @@ class AppFixtures extends Fixture
     {
         // create labels
         for ($i = 0; $i < count(LABELS); $i++) {
-            $label = new Label();
-            $label->setName(LABELS[$i]['name']);
+            $label = new Label(LABELS[$i]['name']);
 
             $manager->persist($label);
             $manager->flush();

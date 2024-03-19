@@ -24,6 +24,15 @@ class Label
     public function __construct(string $name = null)
     {
         $this->photos = new ArrayCollection();
+
+        if ($name !== null) {
+            // replace any non letter/non number by a _
+            $name = preg_replace('/[^a-zA-Z0-9]/', '_', $name);
+
+            // replace multiple _ by one _
+            $name = preg_replace('/_+/', '_', $name);
+        }
+
         $this->name = $name;
     }
 
@@ -35,13 +44,6 @@ class Label
     public function getName(): ?string
     {
         return $this->name;
-    }
-
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     /**

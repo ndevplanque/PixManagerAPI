@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Album;
 use App\Entity\AppUser;
-use App\Entity\Label;
 use App\Entity\Photo;
 use App\Service\Photo\PhotoCreateService;
 use App\Service\Photo\PhotoDeleteService;
@@ -63,15 +62,15 @@ class PhotoController extends AbstractController
         );
     }
 
-    #[Route('/api/photos/labels/{id}', name: 'listPhotosByLabelId', methods: ['GET'])]
+    #[Route('/api/photos/labels/{name}', name: 'listPhotosByLabelId', methods: ['GET'])]
     public function listPhotosByLabelId(
-        Label                      $label,
+        string                     $name,
         PhotoListingByLabelService $photoListingByLabelService,
     ): JsonResponse
     {
         // todo: security check -> requester should be $user
 
-        $listingByLabelResponse = $photoListingByLabelService->handle($label);
+        $listingByLabelResponse = $photoListingByLabelService->handle($name);
 
         return $this->jsonHelper->send(
             json_encode($listingByLabelResponse->jsonSerialize())
