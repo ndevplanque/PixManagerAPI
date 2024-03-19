@@ -8,7 +8,6 @@ use App\Entity\Photo;
 use App\Repository\LabelRepository;
 use App\Response\PhotoListingByLabelResponse;
 use App\Response\PhotoResponse;
-use Exception;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PhotoListingByLabelService
@@ -19,9 +18,6 @@ class PhotoListingByLabelService
     {
     }
 
-    /**
-     * @throws Exception
-     */
     public function handle(string $labelName): PhotoListingByLabelResponse
     {
         $label = $this->labelRepository->findOneBy(['name' => $labelName]);

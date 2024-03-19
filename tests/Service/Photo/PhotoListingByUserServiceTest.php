@@ -8,7 +8,6 @@ use App\Response\PhotoListingByUserResponse;
 use App\Response\PhotoResponse;
 use App\Service\Photo\PhotoListingByUserService;
 use Doctrine\Common\Collections\Collection;
-use Exception;
 use PHPUnit\Framework\TestCase;
 
 class PhotoListingByUserServiceTest extends TestCase
@@ -20,9 +19,6 @@ class PhotoListingByUserServiceTest extends TestCase
         $this->service = new PhotoListingByUserService();
     }
 
-    /**
-     * @throws Exception
-     */
     public function testHandle(): void
     {
         $user = $this->createConfiguredMock(AppUser::class, [

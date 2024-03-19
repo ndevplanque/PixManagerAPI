@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Service\Label;
 
 use App\Repository\LabelRepository;
-use Exception;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LabelDeleteService
@@ -16,9 +15,6 @@ class LabelDeleteService
     {
     }
 
-    /**
-     * @throws Exception
-     */
     public function handle(string $labelName): void
     {
         $label = $this->labelRepository->findOneBy(['name' => $labelName]);

@@ -5,7 +5,6 @@ namespace Tests\App\Service\Photo;
 use App\Entity\Photo;
 use App\Repository\PhotoRepository;
 use App\Service\Photo\PhotoDeleteService;
-use Exception;
 use PHPUnit\Framework\TestCase;
 
 class PhotoDeleteServiceTest extends TestCase
@@ -20,9 +19,6 @@ class PhotoDeleteServiceTest extends TestCase
         );
     }
 
-    /**
-     * @throws Exception
-     */
     public function testHandle(): void
     {
         $photo = $this->createMock(Photo::class);

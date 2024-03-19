@@ -5,7 +5,6 @@ namespace Tests\App\Service\Label;
 use App\Entity\Label;
 use App\Repository\LabelRepository;
 use App\Service\Label\LabelDeleteService;
-use Exception;
 use PHPUnit\Framework\TestCase;
 
 class LabelDeleteServiceTest extends TestCase
@@ -20,9 +19,6 @@ class LabelDeleteServiceTest extends TestCase
         );
     }
 
-    /**
-     * @throws Exception
-     */
     public function testHandle(): void
     {
         $labelName = 'a_supprimer';

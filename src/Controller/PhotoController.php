@@ -15,7 +15,6 @@ use App\Service\Photo\PhotoListingByUserService;
 use App\Service\Photo\PhotoUpdateService;
 use App\Utils\FileHelper;
 use App\Utils\JsonHelper;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -47,9 +46,6 @@ class PhotoController extends AbstractController
         );
     }
 
-    /**
-     * @throws Exception
-     */
     #[Route('/api/photos/users/{id}', name: 'listPhotosByUserId', methods: ['GET'])]
     public function listPhotosByUserId(
         AppUser                   $user,
@@ -113,9 +109,6 @@ class PhotoController extends AbstractController
         );
     }
 
-    /**
-     * @throws Exception
-     */
     #[Route('/api/photos/{id}', name: 'deletePhoto', methods: ['DELETE'])]
     public function deletePhoto(
         Photo              $photo,

@@ -6,7 +6,6 @@ namespace App\Service\Photo;
 
 use App\Entity\Photo;
 use App\Repository\PhotoRepository;
-use Exception;
 
 class PhotoDeleteService
 {
@@ -16,9 +15,6 @@ class PhotoDeleteService
     {
     }
 
-    /**
-     * @throws Exception
-     */
     public function handle(Photo $photo): void
     {
         $this->photoRepository->delete($photo);

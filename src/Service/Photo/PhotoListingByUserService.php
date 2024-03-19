@@ -8,13 +8,9 @@ use App\Entity\AppUser;
 use App\Entity\Photo;
 use App\Response\PhotoListingByUserResponse;
 use App\Response\PhotoResponse;
-use Exception;
 
 class PhotoListingByUserService
 {
-    /**
-     * @throws Exception
-     */
     public function handle(AppUser $user): PhotoListingByUserResponse
     {
         return new PhotoListingByUserResponse(

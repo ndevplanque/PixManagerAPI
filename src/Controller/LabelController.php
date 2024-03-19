@@ -8,7 +8,6 @@ use App\Service\Label\LabelCreateService;
 use App\Service\Label\LabelDeleteService;
 use App\Service\Label\LabelListingService;
 use App\Utils\JsonHelper;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,9 +46,6 @@ class LabelController extends AbstractController
         );
     }
 
-    /**
-     * @throws Exception
-     */
     #[Route('/api/labels/{name}', name: 'deleteLabel', methods: ['DELETE'])]
     public function deleteLabel(
         string             $name,
