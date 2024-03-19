@@ -15,12 +15,9 @@ class LabelResponse implements JsonSerializable
     {
     }
 
-    public function jsonSerialize(): array
+    public function jsonSerialize(): string
     {
-        return [
-            'id' => $this->label->getId(),
-            'name' => $this->label->getName(),
-        ];
+        return $this->label->getName();
     }
 
 }

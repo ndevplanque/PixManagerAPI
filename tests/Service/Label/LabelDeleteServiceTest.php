@@ -7,7 +7,6 @@ use App\Repository\LabelRepository;
 use App\Service\Label\LabelDeleteService;
 use Exception;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Request;
 
 class LabelDeleteServiceTest extends TestCase
 {
@@ -26,14 +25,12 @@ class LabelDeleteServiceTest extends TestCase
      */
     public function testHandle(): void
     {
-        $request = $this->createConfiguredMock(Request::class, [
-            'toArray' => ['name' => 'mon-nouveau-label'],
-        ]);
+        $labelName = 'a_supprimer';
 
         $this->labelRepository
             ->expects($this->once())
             ->method('findOneBy')
-            ->with(['name' => $request->toArray()['name']])
+            ->with(['name' => $labelName])
             ->willReturn($label = $this->createMock(Label::class));
 
         $this->labelRepository
@@ -41,6 +38,6 @@ class LabelDeleteServiceTest extends TestCase
             ->method('delete')
             ->with($label);
 
-        $this->service->handle($request);
+        $this->service->handle($labelName);
     }
 }

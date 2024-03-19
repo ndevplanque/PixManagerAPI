@@ -25,6 +25,7 @@ class FileHelperTest extends TestCase
     {
         $photo = $this->createConfiguredMock(Photo::class, [
             'getId' => 2,
+            'getName' => 'ma photo.jpg',
             'getOwner' => $this->createConfiguredMock(AppUser::class, [
                 'getId' => 1,
             ])

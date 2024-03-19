@@ -51,8 +51,8 @@ class PhotoResponseTest extends TestCase
             ],
             'ownerId' => $ownerId,
             'labels' => [
-                ['id' => $label1Id, 'name' => $label1Name],
-                ['id' => $label2Id, 'name' => $label2Name],
+                $label1Name,
+                $label2Name,
             ],
             'createdAt' => $date,
         ];

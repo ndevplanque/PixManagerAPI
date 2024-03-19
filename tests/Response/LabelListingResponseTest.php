@@ -26,9 +26,9 @@ class LabelListingResponseTest extends TestCase
         ]);
 
         $expected = ['labels' => [
-            ['id' => 1, 'name' => 'dogs'],
-            ['id' => 2, 'name' => 'cats'],
-            ['id' => 3, 'name' => 'cute'],
+            'dogs',
+            'cats',
+            'cute',
         ]];
 
         $this->assertEquals($expected, $response->jsonSerialize());

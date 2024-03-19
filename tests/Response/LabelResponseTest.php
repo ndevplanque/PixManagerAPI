@@ -17,7 +17,7 @@ class LabelResponseTest extends TestCase
             ])
         );
 
-        $this->assertEquals(['id' => 2, 'name' => 'cats'], $response->jsonSerialize());
+        $this->assertEquals('cats', $response->jsonSerialize());
     }
 
 }

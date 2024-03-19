@@ -43,7 +43,7 @@ class LabelController extends AbstractController
         $labelResponse = $labelCreateService->handle($request);
 
         return $this->jsonHelper->created(
-            json_encode($labelResponse)
+            json_encode(['label' => $labelResponse])
         );
     }
 
