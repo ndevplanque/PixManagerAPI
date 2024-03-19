@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Utils;
 
 use App\Entity\Photo;
@@ -32,7 +34,8 @@ class FileHelper
         );
     }
 
-    public function getStoragePath(Photo $photo):string{
+    public function getStoragePath(Photo $photo): string
+    {
         $ownerId = $photo->getOwner()->getId();
         $photoId = $photo->getId();
 

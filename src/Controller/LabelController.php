@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Service\Label\LabelCreateService;
@@ -48,13 +50,13 @@ class LabelController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/api/labels', name: 'deleteLabel', methods: ['DELETE'])]
+    #[Route('/api/labels/{name}', name: 'deleteLabel', methods: ['DELETE'])]
     public function deleteLabel(
-        Request            $request,
+        string             $name,
         LabelDeleteService $labelDeleteService,
     ): JsonResponse
     {
-        $labelDeleteService->handle($request);
+        $labelDeleteService->handle($name);
 
         return $this->jsonHelper->noContent();
     }
