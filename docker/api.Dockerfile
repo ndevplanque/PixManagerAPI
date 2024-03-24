@@ -16,9 +16,8 @@ COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-RUN cd /var/www && \
-    composer install
-
 WORKDIR /var/www
+
+RUN composer install
 
 EXPOSE 80
