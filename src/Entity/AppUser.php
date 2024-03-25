@@ -85,6 +85,11 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
+    public function getUsername(): ?string
+    {
+
+        return $this->email;
+    }
     public function getEmail(): ?string
     {
         return $this->email;
@@ -222,10 +227,10 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getUsername(): string
+/*    public function getUsername(): string
     {
         return explode('@', $this->email)[0];
-    }
+    }*/
 
     public function newAlbum(): Album
     {

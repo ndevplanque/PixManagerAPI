@@ -24,11 +24,11 @@ class Album
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[Groups('users')]
+    #[Groups(['users','albums'])]
     #[ORM\Column]
     private DateTimeImmutable $created_at;
 
-    #[Groups('shared')]
+    #[Groups(['shared','albums'])]
     #[ORM\ManyToMany(targetEntity: AppUser::class, mappedBy: 'shared_albums')]
     private Collection $shared_to;
 

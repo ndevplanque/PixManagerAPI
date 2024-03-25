@@ -4,50 +4,288 @@ namespace App\Controller;
 
 use App\Entity\Album;
 use App\Entity\AppUser;
+use App\Exception\DocError;
+use App\Exception\NotFoundException;
 use App\Repository\AlbumRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use ErrorException;
+use OpenApi\Attributes as OA;
+use OpenApi\Annotations as AA;
+use phpDocumentor\Reflection\DocBlock\Tags\Property;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Controller\AppUserController;
 
-
 #[Route('/api/albums')]
 class AlbumsManagementController extends AbstractController
 {
+    /**
+     * This request return album depending on the id.
+     */
     #[Route('/{id}', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the Album by id',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Album::class, groups: ['albums']))
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response400")
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not found',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response404")
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response500")
+        )
+    )]
+    #[OA\Tag(name: 'Albums')]
+    #[Security(name: 'Bearer')]
     public function get_one(Album $album, SerializerInterface $serializer): JsonResponse
     {
         $jsonAlbumList = $serializer->serialize($album, 'json', ['groups' => ['albums']]);
         return new JsonResponse("Albums: $jsonAlbumList", Response::HTTP_OK, [], true);
     }
+    /**
+     * This request returns albums owned by a specific user.
+     */
+    #[Route('/users/{id}', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the albums owned by the user',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Album::class, groups: ['albums']))
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response400")
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not found',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response404")
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response500")
+        )
+    )]
+    #[OA\Tag(name: 'Albums')]
+    #[Security(name: 'Bearer')]
+    public function getAlbumsByUser(int $id, AlbumRepository $albumRepository, SerializerInterface $serializer): JsonResponse
+    {
+        // Fetch albums by user ID
+        $albums = $albumRepository->findBy(['owner' => $id]);
+        if (empty($albums)) {
+            throw new NotFoundHttpException("No albums found for user with ID $id");
+        }
+        // Serialize the albums
+        $jsonAlbumList = $serializer->serialize($albums, 'json', ['groups' => ['albums']]);
 
-    #[Route('/', name: 'album_list_all', methods: ['GET'])]
+        return new JsonResponse("Albums: $jsonAlbumList", Response::HTTP_OK, [], true);
+    }
+    /**
+     * This request return all the albums.
+     */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the Album by id',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Album::class, groups: ['albums']))
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response400")
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not found',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response404")
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response500")
+        )
+    )]
+    #[OA\Tag(name: 'Albums')]
+    #[Security(name: 'Bearer')]
+    #[Route('', methods: ['GET'])]
     public function get_all(AlbumRepository $albumRepository, SerializerInterface $serializer): JsonResponse
     {
         $albumList = $albumRepository->findAll();
+        if (empty($albumList)) {
+            throw new NotFoundHttpException("No albums found");
+        }
         $jsonAlbumList = $serializer->serialize($albumList, 'json', ['groups' => ['albums']]);
         return new JsonResponse("Albums: $jsonAlbumList", Response::HTTP_OK, [], true);
     }
 
-    #[Route('/', methods: ['POST'])]
+    /**
+     * This request returns albums based on the provided name.
+     */
+    #[Route('/albums', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the albums matching the provided name',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Album::class, groups: ['albums']))
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response400")
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response500")
+        )
+    )]
+    #[OA\Tag(name: 'Albums')]
+    #[Security(name: 'Bearer')]
+    public function getAlbumsByName(Request $request, AlbumRepository $albumRepository, SerializerInterface $serializer): JsonResponse
+    {
+            // Get the album name from query parameters
+            $name = $request->query->get('name');
+            if (!$name) {
+                throw new BadRequestHttpException('Album name parameter is missing');
+            }
+            $albums = $albumRepository->findBy(['name' => $name]);
+            if (empty($albums)) {
+                throw new NotFoundHttpException("No albums found with name: $name");
+            }
+
+            $jsonAlbumList = $serializer->serialize($albums, 'json', ['groups' => ['albums']]);
+
+            return new JsonResponse("Albums: $jsonAlbumList", Response::HTTP_OK, [], true);
+
+    }
+    /**
+     * This request creates a new album.
+     */
+
+    #[OA\RequestBody(
+        request: "AlbumData",
+        description: "Data for creating the album",
+        required: true,
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(property: "name", type: "string"),
+                    new OA\Property(property: "owner", type: "integer")
+                ],
+                type: "object"
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the Album by id',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Album::class, groups: ['albums']))
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response400")
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not found',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response404")
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response500")
+        )
+    )]
+    #[OA\Tag(name: 'Albums')]
+    #[Security(name: 'Bearer')]
+    #[Route('', methods: ['POST'])]
     public function createAlbum(Request $request, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
     {
         $album = $serializer->deserialize($request->getContent(), Album::class, 'json');
         $requestArray = ($request->toArray());
-
+        if (!array_key_exists("owner", $requestArray)) {
+            throw new BadRequestException('Owner required', 400);
+        }
         $id = ($requestArray["owner"]);
         $ownerEntity = $em->getRepository(AppUser::class)->find($id);
         if (!$album->getName()) {
-            return new JsonResponse(['error' => 'Album name is required.'], Response::HTTP_BAD_REQUEST);
+            throw new NotFoundException("album");
         }
         if (!$ownerEntity) {
-            return new JsonResponse(['error' => 'Owner not found.'], Response::HTTP_NOT_FOUND);
+            throw new BadRequestException('Owner not found', 400);
         }
         $album->setOwner($ownerEntity);
         $album->setCreatedAtValue();
@@ -57,6 +295,57 @@ class AlbumsManagementController extends AbstractController
         return new JsonResponse($jsonAlbum, Response::HTTP_CREATED, [], true);
     }
 
+    /**
+     * This request updates an album.
+     */
+    #[OA\RequestBody(
+        request: "AlbumData",
+        description: "Data for creating the album",
+        required: true,
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(property: "owner", type: "integer")
+                ],
+                type: "object"
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Updated the Album by id',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Album::class, groups: ['albums']))
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response400")
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not found',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response404")
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response500")
+        )
+    )]
+    #[OA\Tag(name: 'Albums')]
+    #[Security(name: 'Bearer')]
     #[Route('/{id}', methods: ['PUT'])]
     public function update(Request $request, Album $currentAlbum, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
     {
@@ -70,6 +359,58 @@ class AlbumsManagementController extends AbstractController
         return new JsonResponse($jsonAlbum, Response::HTTP_CREATED, [], true);
     }
 
+    /**
+     * This request updates visibility of an album.
+     */
+    #[OA\RequestBody(
+        request: "AlbumData",
+        description: "Data for creating the album",
+        required: true,
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(property: "newUserId", type: "integer"),
+                    new OA\Property(property: "deleteUserId", type: "integer")
+                ],
+                type: "object"
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Updated the Album by id',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Album::class, groups: ['albums']))
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response400")
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not found',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response404")
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response500")
+        )
+    )]
+    #[OA\Tag(name: 'Albums')]
+    #[Security(name: 'Bearer')]
     #[Route('/share/{id}', methods: ['PUT'])]
     public function updateVisibility(Request $request, Album $currentAlbum, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
     {
@@ -92,6 +433,44 @@ class AlbumsManagementController extends AbstractController
         return new JsonResponse($jsonAlbum, Response::HTTP_CREATED, [], true);
     }
 
+    /**
+     * This request deletes an album.
+     */
+
+    #[OA\Response(
+        response: 200,
+        description: 'Album successfully deleted',
+        content: new OA\JsonContent(
+            type: 'string', example: 'Album was deleted'
+
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response400")
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not found',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response404")
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Internal server error',
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(ref: "#/components/schemas/Response500")
+        )
+    )]
+    #[OA\Tag(name: 'Albums')]
+    #[Security(name: 'Bearer')]
     #[Route('/{id}', name: 'album_delete', methods: ['DELETE'])]
     public function delete(Album $album, EntityManagerInterface $em): JsonResponse
     {
