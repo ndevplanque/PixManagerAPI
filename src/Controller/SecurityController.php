@@ -18,6 +18,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api', name: 'app_user')]
 class SecurityController extends AbstractController
 {
+    /**
+     * @param JsonHelper $jsonHelper
+     * @param ValidatorInterface $validator
+     */
     public function __construct(
         private readonly JsonHelper $jsonHelper,
         private readonly ValidatorInterface $validator,
@@ -25,8 +29,14 @@ class SecurityController extends AbstractController
     }
 
     /**
-     *  Crée un nouvel utilisateur à partir d'une requête HTTP.
-     *  Valide l'utilisateur, hache son mot de passe, persiste l'utilisateur et son nouvel album dans la base de données.
+     *
+     * Crée un nouvel utilisateur à partir d'une requête HTTP.
+     * Valide l'utilisateur, hache son mot de passe, persiste l'utilisateur et son nouvel album dans la base de données.
+     * @param Request $request
+     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $entityManager
+     * @param UserPasswordHasherInterface $hasher
+     * @return JsonResponse
      */
     #[Route('/register', name: 'app_user_register', methods: ['POST'])]
     public function createUser(
@@ -75,9 +85,14 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * Met à jour le mot de passe de l'utilisateur à partir d'une requête HTTP.
-     * Vérifie les informations d'identification de l'utilisateur, hache le nouveau mot de passe,
-     * et persiste les modifications dans la base de données.
+     *  Met à jour le mot de passe de l'utilisateur à partir d'une requête HTTP.
+     *  Vérifie les informations d'identification de l'utilisateur, hache le nouveau mot de passe,
+     *  et persiste les modifications dans la base de données.
+     * @param Request $request
+     * @param UserPasswordHasherInterface $hasher
+     * @param EntityManagerInterface $entityManager
+     * @param TokenStorageInterface $tokenStorage
+     * @return JsonResponse
      */
     #[Route('/password', name: 'app_user_password', methods: ['PUT'])]
     public function updatePassword(
@@ -115,12 +130,17 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * Information : Route inutile pour le moment mais elle pourrait servir (ne pas supprimer)
-     * Traite la requête de connexion de l'utilisateur.
-     * Dé-sérialise les données JSON de la requête en un objet AppUser,
-     * puis vérifie les informations d'identification fournies.
-     * Si les informations sont valides, retourne les données de l'utilisateur au format JSON.
-    */
+     *  Information : Route inutile pour le moment mais elle pourrait servir (ne pas supprimer)
+     *  Traite la requête de connexion de l'utilisateur.
+     *  Dé-sérialise les données JSON de la requête en un objet AppUser,
+     *  puis vérifie les informations d'identification fournies.
+     *  Si les informations sont valides, retourne les données de l'utilisateur au format JSON.
+     * @param Request $request
+     * @param SerializerInterface $serializer
+     * @param UserPasswordHasherInterface $hasher
+     * @param AppUserRepository $appUserRepository
+     * @return JsonResponse
+     */
 //    #[Route('/login', name: 'app_user_login', methods: ['POST'])]
 //    public function login(
 //        Request $request,
@@ -145,5 +165,4 @@ class SecurityController extends AbstractController
 //
 //        return new JsonResponse(['user' => $json], Response::HTTP_OK);
 //    }
-
 }
