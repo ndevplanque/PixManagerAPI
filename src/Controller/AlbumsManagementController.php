@@ -8,10 +8,7 @@ use App\Exception\DocError;
 use App\Exception\NotFoundException;
 use App\Repository\AlbumRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use ErrorException;
 use OpenApi\Attributes as OA;
-use OpenApi\Annotations as AA;
-use phpDocumentor\Reflection\DocBlock\Tags\Property;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,13 +16,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
-use App\Controller\AppUserController;
 
 #[Route('/api/albums')]
 class AlbumsManagementController extends AbstractController
@@ -436,7 +431,20 @@ class AlbumsManagementController extends AbstractController
     /**
      * This request deletes an album.
      */
-
+    #[OA\RequestBody(
+        request: "AlbumData",
+        description: "Data with ids to delete",
+        required: true,
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(property: "idsToDelete", type: "array", items: new OA\Items(type: "integer")),
+                ],
+                type: "object"
+            )
+        )
+    )]
     #[OA\Response(
         response: 200,
         description: 'Album successfully deleted',
@@ -471,10 +479,19 @@ class AlbumsManagementController extends AbstractController
     )]
     #[OA\Tag(name: 'Albums')]
     #[Security(name: 'Bearer')]
-    #[Route('/{id}', name: 'album_delete', methods: ['DELETE'])]
-    public function delete(Album $album, EntityManagerInterface $em): JsonResponse
+    #[Route('', name: 'album_delete', methods: ['DELETE'])]
+    public function delete(Request $request, EntityManagerInterface $em): JsonResponse
     {
-        $em->remove($album);
+        $content = json_decode($request->getContent(), true);
+        $idsToDelete = $content['idsToDelete'];
+        var_dump($idsToDelete);
+        if (!is_array($idsToDelete)) {
+            throw new BadRequestException("Invalid input format, must be an array of ids", 400);
+        }
+        foreach ($idsToDelete as $id) {
+            $album = $em->getRepository(Album::class)->find($id);
+            $em->remove($album);
+        }
         $em->flush();
         return new JsonResponse("Album Deleted", Response::HTTP_OK, [], true);
     }
