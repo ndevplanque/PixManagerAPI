@@ -22,7 +22,7 @@ class PhotoFactory
     public function fromRequestAndAlbum(Request $request, Album $album): Photo
     {
         $labels = json_decode(
-            $this->requestHelper->getParameter($request, 'labels')
+            $this->requestHelper->getBodyParam($request, 'labels')
         );
 
         $file = $this->requestHelper->getUploadedFile($request, 'file');
