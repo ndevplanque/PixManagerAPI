@@ -23,7 +23,7 @@ class TokenSubscriber implements EventSubscriberInterface
     {
         $email = $this->tokenStorage->getToken()->getUserIdentifier();
         $user = $this->appUserRepository->findOneBy(['email' => $email]);
-        $event->getRequest()->attributes->set('jwt-token-owner', $user);
+        $event->getRequest()->attributes->set('jwt-app-user', $user);
     }
 
     public static function getSubscribedEvents(): array
