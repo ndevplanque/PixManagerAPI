@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Photo;
 
+use App\Entity\AppUser;
 use App\Entity\Photo;
 use App\Repository\LabelRepository;
 use App\Response\PhotoListingByLabelResponse;
@@ -18,16 +19,13 @@ class PhotoListingByLabelService
     {
     }
 
-    public function handle(string $labelName): PhotoListingByLabelResponse
+    public function handle(AppUser $user, string $labelName): PhotoListingByLabelResponse
     {
         $label = $this->labelRepository->findOneBy(['name' => $labelName]);
 
         if ($label === null) {
             throw new HttpException(404, "Label $labelName not found!");
         }
-
-        // todo: get user from jwt instead
-        $user = $label->getPhotos()->first()->getOwner();
 
         $photos = [];
 
