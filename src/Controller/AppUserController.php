@@ -15,11 +15,9 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class AppUserController extends AbstractController
 {
-    private readonly JsonHelper $jsonHelper;
-
-    public function __construct()
-    {
-        $this->jsonHelper = new JsonHelper();
+    public function __construct(
+        private readonly JsonHelper $jsonHelper
+    ) {
     }
 
     #[Route('/api/users/{id}', name: 'getUserById', methods: ['GET'])]

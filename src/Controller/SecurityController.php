@@ -15,14 +15,20 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route('/api', name: 'app_user')]
 class SecurityController extends AbstractController
 {
     public function __construct(
         private readonly JsonHelper $jsonHelper,
         private readonly ValidatorInterface $validator,
-    ) {}
+    ) {
+    }
 
-    #[Route('api/register', name: 'app_user_register', methods: ['POST'])]
+    /**
+     *  Crée un nouvel utilisateur à partir d'une requête HTTP.
+     *  Valide l'utilisateur, hache son mot de passe, persiste l'utilisateur et son nouvel album dans la base de données.
+     */
+    #[Route('/register', name: 'app_user_register', methods: ['POST'])]
     public function createUser(
         Request                $request,
         SerializerInterface    $serializer,
@@ -68,14 +74,12 @@ class SecurityController extends AbstractController
         return $this->jsonHelper->created($json);
     }
 
-    // TODO : A faire côter client (equipe FRONT)
-    #[Route('/logout', name: 'app_user_logout', methods: ['GET'])]
-    public function logout(Request $request)
-    {
-
-    }
-
-    #[Route('/api/password', name: 'app_password', methods: ['PUT'])]
+    /**
+     * Met à jour le mot de passe de l'utilisateur à partir d'une requête HTTP.
+     * Vérifie les informations d'identification de l'utilisateur, hache le nouveau mot de passe,
+     * et persiste les modifications dans la base de données.
+     */
+    #[Route('/password', name: 'app_user_password', methods: ['PUT'])]
     public function updatePassword(
         Request $request,
         UserPasswordHasherInterface $hasher,
@@ -111,8 +115,12 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * Commentaire : Route inutile pour le moment mais elle pourrait servir (ne pas supprimer)
-     */
+     * Information : Route inutile pour le moment mais elle pourrait servir (ne pas supprimer)
+     * Traite la requête de connexion de l'utilisateur.
+     * Dé-sérialise les données JSON de la requête en un objet AppUser,
+     * puis vérifie les informations d'identification fournies.
+     * Si les informations sont valides, retourne les données de l'utilisateur au format JSON.
+    */
 //    #[Route('/login', name: 'app_user_login', methods: ['POST'])]
 //    public function login(
 //        Request $request,

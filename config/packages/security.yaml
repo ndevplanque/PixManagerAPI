@@ -20,6 +20,7 @@ security:
         login:
             pattern: ^/api/login
             stateless: true
+            # Configuration pour la gestion de la connexion via JSON Web Tokens (JWT).
             json_login:
                 check_path: /api/login_check
                 username_path: email
@@ -30,6 +31,7 @@ security:
         api:
             pattern: ^/api
             stateless: true
+            # Configuration pour l'API RESTful.
             jwt: ~
 
             # activate different ways to authenticate
@@ -41,7 +43,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        # Accès public à la route d'inscription.
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        # Accès restreint aux routes de l'API pour les utilisateurs authentifiés.
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
