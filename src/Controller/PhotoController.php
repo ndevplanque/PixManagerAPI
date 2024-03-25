@@ -15,29 +15,32 @@ use App\Service\Photo\PhotoListingByUserService;
 use App\Service\Photo\PhotoUpdateService;
 use App\Utils\FileHelper;
 use App\Utils\JsonHelper;
+use App\Utils\RequestHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 class PhotoController extends AbstractController
 {
     public function __construct(
-        private readonly JsonHelper $jsonHelper,
-        private readonly FileHelper $fileHelper,
+        private readonly JsonHelper    $jsonHelper,
+        private readonly FileHelper    $fileHelper,
+        private readonly RequestHelper $requestHelper,
     )
     {
     }
 
     #[Route('/api/photos/albums/{id}', name: 'listPhotosByAlbumId', methods: ['GET'])]
     public function listPhotosByAlbumId(
+        Request                    $request,
         Album                      $album,
         PhotoListingByAlbumService $photoListingByAlbumService,
     ): JsonResponse
     {
-        $user = $album->getOwner();
-        // todo: security check -> requester should be $user
+        $this->requestHelper->getUser($request)->shouldBe($album->getOwner());
 
         $listingByAlbumResponse = $photoListingByAlbumService->handle($album);
 
@@ -48,11 +51,13 @@ class PhotoController extends AbstractController
 
     #[Route('/api/photos/users/{id}', name: 'listPhotosByUserId', methods: ['GET'])]
     public function listPhotosByUserId(
+        Request                   $request,
         AppUser                   $user,
         PhotoListingByUserService $photoListingByUserService,
     ): JsonResponse
     {
-        // todo: security check -> requester should be $user
+        $this->requestHelper->getUser($request)->shouldBe($user);
+
         $listingByUserResponse = $photoListingByUserService->handle($user);
 
         return $this->jsonHelper->send(
@@ -60,15 +65,16 @@ class PhotoController extends AbstractController
         );
     }
 
-    #[Route('/api/photos/labels/{name}', name: 'listPhotosByLabelId', methods: ['GET'])]
-    public function listPhotosByLabelId(
+    #[Route('/api/photos/labels/{name}', name: 'listPhotosByLabelName', methods: ['GET'])]
+    public function listPhotosByLabelName(
+        Request                    $request,
         string                     $name,
         PhotoListingByLabelService $photoListingByLabelService,
     ): JsonResponse
     {
-        // todo: security check -> requester should be $user
+        $user = $this->requestHelper->getUser($request);
 
-        $listingByLabelResponse = $photoListingByLabelService->handle($name);
+        $listingByLabelResponse = $photoListingByLabelService->handle($user, $name);
 
         return $this->jsonHelper->send(
             json_encode($listingByLabelResponse->jsonSerialize())
@@ -82,8 +88,7 @@ class PhotoController extends AbstractController
         PhotoCreateService $photoCreateService,
     ): JsonResponse
     {
-        $user = $album->getOwner();
-        // todo: security check -> requester should be $user
+        $this->requestHelper->getUser($request)->shouldBe($album->getOwner());
 
         $photoResponse = $photoCreateService->handle($request, $album);
 
@@ -99,8 +104,7 @@ class PhotoController extends AbstractController
         PhotoUpdateService $photoUpdateService,
     ): JsonResponse
     {
-        $user = $photo->getOwner();
-        // todo: security check -> requester should be $user
+        $this->requestHelper->getUser($request)->shouldBe($photo->getOwner());
 
         $photoResponse = $photoUpdateService->handle($request, $photo);
 
@@ -111,10 +115,13 @@ class PhotoController extends AbstractController
 
     #[Route('/api/photos/{id}', name: 'deletePhoto', methods: ['DELETE'])]
     public function deletePhoto(
+        Request            $request,
         Photo              $photo,
         PhotoDeleteService $photoDeleteService,
     ): JsonResponse
     {
+        $this->requestHelper->getUser($request)->shouldBe($photo->getOwner());
+
         $photoDeleteService->handle($photo);
 
         return $this->jsonHelper->noContent();
@@ -122,10 +129,25 @@ class PhotoController extends AbstractController
 
     #[Route('/api/photos/{id}', name: 'getPhotoFile', methods: ['GET'])]
     public function getPhotoFile(
-        Photo $photo
+        Request $request,
+        Photo   $photo,
     ): BinaryFileResponse
     {
-        // todo: check that this user does owns the photo or it belongs to a shared album
+        $this->requestHelper->getUser($request)->shouldHaveAccessToPhoto($photo);
+
         return $this->fileHelper->sendPhoto($photo);
+    }
+
+    #[Route('/api/photos', name: 'listPhoto', methods: ['GET'])]
+    public function listPhoto(
+        Request $request,
+    ): JsonResponse
+    {
+        throw new HttpException(500, 'Not implemented.');
+
+        $user = $this->requestHelper->getUser($request);
+        $search = $this->requestHelper->getQueryParam($request, 'search');
+
+        return $this->jsonHelper->send('');
     }
 }
