@@ -328,6 +328,6 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
             return;
         }
 
-        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'You cannot see this album.');
+        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'You do not have admin privileges.');
     }
 }
