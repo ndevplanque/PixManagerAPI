@@ -9,7 +9,12 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RequestHelper
 {
-    public function getParameter(Request $request, string $key): bool|float|int|null|string
+    public function getQueryParam(Request $request, string $key): bool|float|int|null|string
+    {
+        return $request->query->get($key);
+    }
+
+    public function getBodyParam(Request $request, string $key): bool|float|int|null|string
     {
         return $request->request->get($key);
     }
