@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Utils;
 
 use App\Validator\PasswordValidator;
 
 class PasswordHelper
 {
-    private readonly PasswordValidator $passwordValidator;
-
-    public function __construct()
+    public function __construct(
+        private readonly PasswordValidator $passwordValidator
+    )
     {
-        $this->passwordValidator = new PasswordValidator();
     }
 
     public function hash(string $newPassword): string

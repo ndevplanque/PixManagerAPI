@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Validator;
 
 use Symfony\Component\HttpFoundation\Response;
@@ -12,17 +14,18 @@ class PasswordValidator
      * @param string $newPassword - Password to validate
      * @return string - Validated password
      */
-    public function validate(string $newPassword):string{
+    public function validate(string $newPassword): string
+    {
         // todo: add regex
         $ok = true;
 
-        if (!$ok){
+        if (!$ok) {
             throw new HttpException(
                 Response::HTTP_BAD_REQUEST,
                 'New password does not match policy.'
             );
         }
 
-       return password_hash($newPassword, PASSWORD_BCRYPT);
+        return $newPassword;
     }
 }

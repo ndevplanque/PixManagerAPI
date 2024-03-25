@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\Label;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @extends ServiceEntityRepository<Label>
@@ -16,33 +20,40 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class LabelRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(
+        ManagerRegistry                         $registry,
+        private readonly EntityManagerInterface $manager
+    )
     {
         parent::__construct($registry, Label::class);
     }
 
-    //    /**
-    //     * @return Label[] Returns an array of Label objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('l')
-    //            ->andWhere('l.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('l.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /** Tries to insert a Label object */
+    public function insert(Label $label): Label
+    {
+        if ($this->findOneBy(['name' => $label->getName()]) !== null) {
+            throw new HttpException(400, "Label {$label->getName()} already exists!");
+        }
+        $this->manager->persist($label);
+        $this->manager->flush();
+        return $label;
+    }
 
-    //    public function findOneBySomeField($value): ?Label
-    //    {
-    //        return $this->createQueryBuilder('l')
-    //            ->andWhere('l.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /** Finds a Label object by name or create it if it doesn't exist */
+    public function findOrInsert(string $labelName): Label
+    {
+        $label = $this->findOneBy(['name' => $labelName]);
+        if ($label === null) {
+            $this->manager->persist($label = new Label($labelName));
+            $this->manager->flush();
+            return $label;
+        }
+        return $label;
+    }
+
+    public function delete(Label $label): void
+    {
+        $this->manager->remove($label);
+        $this->manager->flush();
+    }
 }

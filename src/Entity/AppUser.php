@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\AppUserRepository;
@@ -41,10 +43,14 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Album::class, inversedBy: 'shared_to')]
     private Collection $shared_albums;
 
+    #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'owner', cascade: ['persist'], orphanRemoval: true)]
+    private Collection $photos;
+
     public function __construct()
     {
         $this->owned_albums = new ArrayCollection();
         $this->shared_albums = new ArrayCollection();
+        $this->photos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -200,5 +206,45 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         $this->addOwnedAlbum($album);
         $album->setName('Default');
         return $album;
+    }
+
+    /**
+     * @return Collection<int, Photo>
+     */
+    public function getPhotos(): Collection
+    {
+        return $this->photos;
+    }
+
+    public function addPhoto(Photo $photo): static
+    {
+        if (!$this->photos->contains($photo)) {
+            $this->photos->add($photo);
+            $photo->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removePhoto(Photo $photo): static
+    {
+        if ($this->photos->removeElement($photo)) {
+            // set the owning side to null (unless already changed)
+            if ($photo->getOwner() === $this) {
+                $photo->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * If no album is specified, uses the default album of the user
+     */
+    public function newPhoto(string $name = null, Album $album = null): Photo
+    {
+        $this->addPhoto($photo = new Photo($name));
+        $photo->setAlbum($album ?? $this->getOwnedAlbums()->first());
+        return $photo;
     }
 }
