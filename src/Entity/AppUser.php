@@ -20,13 +20,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: "email", message: "Email already used")]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups('users')]
+    #[Groups(['users','shared'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups('users')]
+    #[Groups(['users', 'albums','shared'])]
     #[ORM\Column(length: 255)]
     #[Assert\Email(
         message: "Email {{ value }} are not a valid email")
@@ -87,6 +87,11 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
+    public function getUsername(): ?string
+    {
+
+        return $this->email;
+    }
     public function getEmail(): ?string
     {
         return $this->email;
@@ -224,10 +229,10 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getUsername(): string
+/*    public function getUsername(): string
     {
         return explode('@', $this->email)[0];
-    }
+    }*/
 
     public function newAlbum(): Album
     {
