@@ -45,6 +45,7 @@ security:
     access_control:
         # Accès public à la route d'inscription.
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/doc, roles: PUBLIC_ACCESS }
         # Accès restreint aux routes de l'API pour les utilisateurs authentifiés.
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 
