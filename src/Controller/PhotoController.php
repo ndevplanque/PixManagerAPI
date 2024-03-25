@@ -141,14 +141,20 @@ class PhotoController extends AbstractController
 
     #[Route('/api/photos', name: 'listPhoto', methods: ['GET'])]
     public function listPhoto(
-        Request $request,
+        Request                   $request,
+        PhotoListingByUserService $photoListingByUserService,
     ): JsonResponse
     {
-        throw new HttpException(500, 'Not implemented.');
-
         $user = $this->requestHelper->getUser($request);
+
         $search = $this->requestHelper->getQueryParam($request, 'search');
 
-        return $this->jsonHelper->send('');
+        $search = $search !== null ? (string)$search : null;
+
+        $listingByUserResponse = $photoListingByUserService->handle($user, $search);
+
+        return $this->jsonHelper->send(
+            json_encode($listingByUserResponse)
+        );
     }
 }
