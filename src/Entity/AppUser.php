@@ -9,6 +9,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -273,5 +275,45 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         $this->addPhoto($photo = new Photo($name));
         $photo->setAlbum($album ?? $this->getOwnedAlbums()->first());
         return $photo;
+    }
+
+    public function equals(?AppUser $user): bool
+    {
+        return $this->getId() === $user?->getId();
+    }
+
+    public function shouldBe(?AppUser $user): void
+    {
+        if ($this->equals($user)) {
+            return;
+        }
+
+        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Wrong identity.');
+    }
+
+    public function shouldHaveAccessToPhoto(?Photo $photo): void
+    {
+        foreach ($this->owned_albums->getIterator() as $album) {
+            if ($photo->getAlbum()->equals($album)) {
+                return;
+            }
+        }
+
+        foreach ($this->shared_albums->getIterator() as $album) {
+            if ($photo->getAlbum()->equals($album)) {
+                return;
+            }
+        }
+
+        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'You cannot see this album.');
+    }
+
+    public function shouldBeAdmin(): void
+    {
+        if ($this->is_admin === true || in_array('ROLE_ADMIN', $this->roles)) {
+            return;
+        }
+
+        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'You cannot see this album.');
     }
 }
