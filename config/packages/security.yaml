@@ -13,9 +13,26 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
-            provider: app_user_provider
+#        main:
+#            lazy: true
+#            provider: app_user_provider
+
+        login:
+            pattern: ^/api/login
+            stateless: true
+            # Configuration pour la gestion de la connexion via JSON Web Tokens (JWT).
+            json_login:
+                check_path: /api/login_check
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern: ^/api
+            stateless: true
+            # Configuration pour l'API RESTful.
+            jwt: ~
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -26,8 +43,10 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Accès public à la route d'inscription.
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        # Accès restreint aux routes de l'API pour les utilisateurs authentifiés.
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

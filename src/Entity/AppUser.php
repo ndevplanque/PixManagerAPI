@@ -8,11 +8,14 @@ use App\Repository\AppUserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AppUserRepository::class)]
+#[UniqueEntity(fields: "email", message: "Email already used")]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[Groups('users')]
@@ -23,9 +26,33 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Groups('users')]
     #[ORM\Column(length: 255)]
+    #[Assert\Email(
+        message: "Email {{ value }} are not a valid email")
+    ]
     private ?string $email = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 128)]
+    #[Assert\NotBlank(
+        message: "The password cannot be blank."
+    )]
+    #[Assert\Length(
+        min: 8,
+        max: 128,
+        minMessage: "The password must be at least {{ limit }} characters long.",
+        maxMessage: "The password cannot be longer than {{ limit }} characters."
+    )]
+    #[Assert\Regex(
+        pattern: "/[A-Z]/",
+        message: "The password must contain at least one uppercase letter."
+    )]
+    #[Assert\Regex(
+        pattern: "/[a-z]/",
+        message: "The password must contain at least one lowercase letter."
+    )]
+    #[Assert\Regex(
+        pattern: "/[0-9]/",
+        message: "The password must contain at least one number."
+    )]
     private ?string $password = null;
 
     #[ORM\Column]
