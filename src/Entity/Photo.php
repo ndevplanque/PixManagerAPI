@@ -133,4 +133,29 @@ class Photo
 
         return $this;
     }
+
+    /**
+     * @return int - Accuracy score : the least, the most accurate
+     */
+    public function getAccuracyScore(string $search): int
+    {
+        $labels = join(' ', array_map(fn(Label $label)=>$label->getName(), $this->labels->getValues()));
+        $compareString = "$labels $this->name";
+
+        $distance = levenshtein(
+            string1: metaphone($search),
+            string2: metaphone($compareString),
+            insertion_cost: 10,
+            replacement_cost: 20,
+            deletion_cost: 30,
+        );
+
+        similar_text(
+            string1: $search,
+            string2: $compareString,
+            percent: $similarity,
+        );
+
+        return (int)($distance * 100 / $similarity);
+    }
 }
