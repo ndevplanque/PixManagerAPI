@@ -136,4 +136,9 @@ class Album
 
         return $this;
     }
+
+    public function equals(?Album $album): bool
+    {
+        return $this->getId() === $album?->getId();
+    }
 }
