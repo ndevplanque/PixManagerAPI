@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\Label\LabelCreateService;
-use App\Service\Label\LabelDeleteService;
 use App\Service\Label\LabelListingService;
 use App\Utils\JsonHelper;
-use App\Utils\RequestHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +16,6 @@ class LabelController extends AbstractController
 {
     public function __construct(
         private readonly JsonHelper $jsonHelper,
-        private readonly RequestHelper $requestHelper,
     )
     {
     }
@@ -46,19 +43,5 @@ class LabelController extends AbstractController
         return $this->jsonHelper->created(
             json_encode(['label' => $labelResponse])
         );
-    }
-
-    #[Route('/api/labels/{name}', name: 'deleteLabel', methods: ['DELETE'])]
-    public function deleteLabel(
-        Request $request,
-        string             $name,
-        LabelDeleteService $labelDeleteService,
-    ): JsonResponse
-    {
-        $this->requestHelper->getUser($request)->shouldBeAdmin();
-
-        $labelDeleteService->handle($name);
-
-        return $this->jsonHelper->noContent();
     }
 }

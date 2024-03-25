@@ -20,13 +20,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: "email", message: "Email already used")]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['users','shared'])]
+    #[Groups(['users', 'shared'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['users', 'albums','shared'])]
+    #[Groups(['users', 'albums', 'shared'])]
     #[ORM\Column(length: 255)]
     #[Assert\Email(
         message: "Email {{ value }} are not a valid email")
@@ -92,6 +92,7 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this->email;
     }
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -229,16 +230,11 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-/*    public function getUsername(): string
-    {
-        return explode('@', $this->email)[0];
-    }*/
-
-    public function newAlbum(): Album
+    public function newAlbum(string $name = null): Album
     {
         $album = new Album();
         $this->addOwnedAlbum($album);
-        $album->setName('Default');
+        $album->setName($name ?? 'Default');
         return $album;
     }
 
@@ -284,7 +280,7 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function equals(?AppUser $user): bool
     {
-        return $this->getId() === $user?->getId();
+        return $user !== null && $this->getId() === $user->getId();
     }
 
     public function shouldBe(?AppUser $user): void
@@ -298,14 +294,27 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function shouldHaveAccessToPhoto(?Photo $photo): void
     {
-        foreach ($this->owned_albums->getIterator() as $album) {
-            if ($photo->getAlbum()->equals($album)) {
+        if ($photo === null) {
+            return;
+        }
+
+        $this->shouldHaveAccessToAlbum($photo->getAlbum());
+    }
+
+    public function shouldHaveAccessToAlbum(?Album $album): void
+    {
+        if ($album === null) {
+            return;
+        }
+
+        foreach ($this->owned_albums->getIterator() as $ownedAlbum) {
+            if ($album->equals($ownedAlbum)) {
                 return;
             }
         }
 
-        foreach ($this->shared_albums->getIterator() as $album) {
-            if ($photo->getAlbum()->equals($album)) {
+        foreach ($this->shared_albums->getIterator() as $sharedAlbum) {
+            if ($album->equals($sharedAlbum)) {
                 return;
             }
         }

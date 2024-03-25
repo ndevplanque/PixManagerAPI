@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Album;
-use App\Entity\AppUser;
 use App\Entity\Photo;
+use App\Service\Album\AlbumEnsureGetService;
 use App\Service\Photo\PhotoCreateService;
 use App\Service\Photo\PhotoDeleteService;
 use App\Service\Photo\PhotoListingByAlbumService;
@@ -20,7 +20,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 class PhotoController extends AbstractController
@@ -49,46 +48,48 @@ class PhotoController extends AbstractController
         );
     }
 
-    #[Route('/api/photos/users/{id}', name: 'listPhotosByUserId', methods: ['GET'])]
-    public function listPhotosByUserId(
-        Request                   $request,
-        AppUser                   $user,
-        PhotoListingByUserService $photoListingByUserService,
-    ): JsonResponse
-    {
-        $this->requestHelper->getUser($request)->shouldBe($user);
-
-        $listingByUserResponse = $photoListingByUserService->handle($user);
-
-        return $this->jsonHelper->send(
-            json_encode($listingByUserResponse->jsonSerialize())
-        );
-    }
-
-    #[Route('/api/photos/labels/{name}', name: 'listPhotosByLabelName', methods: ['GET'])]
+    #[Route('/api/photos/labels/{labelName}', name: 'listPhotosByLabelName', methods: ['GET'])]
     public function listPhotosByLabelName(
         Request                    $request,
-        string                     $name,
+        string                     $labelName,
         PhotoListingByLabelService $photoListingByLabelService,
     ): JsonResponse
     {
         $user = $this->requestHelper->getUser($request);
 
-        $listingByLabelResponse = $photoListingByLabelService->handle($user, $name);
+        $listingByLabelResponse = $photoListingByLabelService->handle($user, $labelName);
 
         return $this->jsonHelper->send(
             json_encode($listingByLabelResponse->jsonSerialize())
         );
     }
 
-    #[Route('/api/photos/albums/{id}', name: "createPhoto", methods: ['POST'])]
-    public function createPhoto(
+    #[Route('/api/photos/albums/{id}', name: "createPhotoInAlbum", methods: ['POST'])]
+    public function createPhotoInAlbum(
         Request            $request,
         Album              $album,
         PhotoCreateService $photoCreateService,
     ): JsonResponse
     {
-        $this->requestHelper->getUser($request)->shouldBe($album->getOwner());
+        $this->requestHelper->getUser($request)->shouldHaveAccessToAlbum($album);
+
+        $photoResponse = $photoCreateService->handle($request, $album);
+
+        return $this->jsonHelper->created(
+            json_encode($photoResponse->jsonSerialize())
+        );
+    }
+
+    #[Route('/api/photos', name: "createPhoto", methods: ['POST'])]
+    public function createPhoto(
+        Request               $request,
+        AlbumEnsureGetService $albumEnsureGetService,
+        PhotoCreateService    $photoCreateService,
+    ): JsonResponse
+    {
+        $user = $this->requestHelper->getUser($request);
+
+        $album = $albumEnsureGetService->handle($user);
 
         $photoResponse = $photoCreateService->handle($request, $album);
 
