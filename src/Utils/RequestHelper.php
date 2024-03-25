@@ -32,6 +32,6 @@ class RequestHelper
 
     public function getUser(Request $request): AppUser
     {
-        return $request->attributes->get('jwt-app-user');
+        return $request->attributes->get('requester');
     }
 }
