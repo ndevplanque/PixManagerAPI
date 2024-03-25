@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\Photo;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,33 +19,31 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PhotoRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(
+        ManagerRegistry                         $registry,
+        private readonly EntityManagerInterface $manager,
+    )
     {
         parent::__construct($registry, Photo::class);
     }
 
-    //    /**
-    //     * @return Photo[] Returns an array of Photo objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function insert(Photo $photo): Photo
+    {
+        $this->manager->persist($photo);
+        $this->manager->flush();
+        return $photo;
+    }
 
-    //    public function findOneBySomeField($value): ?Photo
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function update(Photo $photo): Photo
+    {
+        $this->manager->persist($photo);
+        $this->manager->flush();
+        return $photo;
+    }
+
+    public function delete(Photo $photo): void
+    {
+        $this->manager->remove($photo);
+        $this->manager->flush();
+    }
 }

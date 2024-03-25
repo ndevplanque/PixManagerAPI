@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\PhotoRepository;
@@ -22,18 +24,23 @@ class Photo
     #[ORM\Column]
     private ?DateTimeImmutable $created_at = null;
 
-    #[ORM\ManyToMany(targetEntity: Label::class, mappedBy: 'photos')]
+    #[ORM\ManyToMany(targetEntity: Label::class, mappedBy: 'photos', cascade: ['persist'])]
     private Collection $labels;
 
     #[ORM\ManyToOne(inversedBy: 'photos')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Album $album = null;
 
-    /** @deprecated use Album::newPhoto() */
-    public function __construct()
+    #[ORM\ManyToOne(inversedBy: 'photos')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?AppUser $owner = null;
+
+    /** @deprecated use AppUser::newPhoto() */
+    public function __construct(string $name = null)
     {
         $this->created_at = new DateTimeImmutable();
         $this->labels = new ArrayCollection();
+        $this->name = $name;
     }
 
     public function getId(): ?int
@@ -85,6 +92,24 @@ class Photo
         return $this;
     }
 
+    /**
+     * @param string[] $names
+     */
+    public function removeLabelsByName(array $names): static
+    {
+        /** @var Label[] $labels */
+        $labels = $this->getLabels()->getValues();
+        for ($i = 0; $i < count($names); $i++) {
+            foreach ($labels as $label) {
+                if ($label->getName() === $names[$i]) {
+                    $this->removeLabel($label);
+                    break;
+                }
+            }
+        }
+        return $this;
+    }
+
     public function getAlbum(): ?Album
     {
         return $this->album;
@@ -93,6 +118,18 @@ class Photo
     public function setAlbum(?Album $album): static
     {
         $this->album = $album;
+
+        return $this;
+    }
+
+    public function getOwner(): ?AppUser
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?AppUser $owner): static
+    {
+        $this->owner = $owner;
 
         return $this;
     }

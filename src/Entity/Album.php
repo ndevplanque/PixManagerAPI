@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\AlbumRepository;
@@ -29,7 +31,7 @@ class Album
     #[ORM\ManyToMany(targetEntity: AppUser::class, mappedBy: 'shared_albums')]
     private Collection $shared_to;
 
-    #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'album', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'album', cascade: ['persist'], orphanRemoval: true)]
     private Collection $photos;
 
     #[ORM\ManyToOne(inversedBy: 'albums')]
@@ -133,11 +135,5 @@ class Album
         $this->owner = $owner;
 
         return $this;
-    }
-
-    public function newPhoto():Photo{
-        $this->addPhoto($photo = new Photo());
-        $photo->setAlbum($this);
-        return $photo;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\AppUser;
@@ -30,8 +32,8 @@ class AppUserController extends AbstractController
         return $this->jsonHelper->send($json);
     }
 
-    #[Route('/api/users', name: 'getUsers', methods: ['GET'])]
-    public function getUsers(
+    #[Route('/api/users', name: 'listUsers', methods: ['GET'])]
+    public function listUsers(
         AppUserRepository   $userRepository,
         SerializerInterface $serializer,
     ): JsonResponse
