@@ -8,9 +8,16 @@ use App\Entity\AppUser;
 use App\Entity\Label;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    public function __construct(
+        private readonly UserPasswordHasherInterface $hasher,
+    )
+    {
+    }
+
     public function load(ObjectManager $manager): void
     {
         // create labels
@@ -21,18 +28,18 @@ class AppFixtures extends Fixture
             $manager->flush();
         }
 
-
         // create users and default albums
         for ($i = 0; $i < count(USERS); $i++) {
             $user = new AppUser();
             $user->setEmail(USERS[$i]['email']);
-            $user->setPassword(USERS[$i]['password']);
+            $user->setPassword($this->hasher->hashPassword(
+                $user,
+                USERS[$i]['password'],
+            ));
             $user->setIsAdmin(USERS[$i]['is_admin']);
             $user->setRoles(USERS[$i]['roles']);
 
             $manager->persist($user);
-            $manager->flush();
-
             $manager->persist($user->newAlbum());
             $manager->flush();
         }
