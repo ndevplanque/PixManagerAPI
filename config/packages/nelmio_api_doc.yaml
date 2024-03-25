@@ -1,0 +1,58 @@
+nelmio_api_doc:
+    documentation:
+        components:
+            schemas:
+
+                Response400:
+                    type: object
+                    properties:
+                        success:
+                            type: boolean
+                            example: false
+                        status:
+                            type: integer
+                            example: 400
+                        message:
+                            type: string
+                            example: "Bad Body"
+                        reason:
+                            type: string
+                            example: "Bad Request"
+                Response404:
+                    response: 404,
+                    description: 'Not found'
+                    type: object
+                    properties:
+                        success:
+                            type: boolean
+                            example: false
+                        status:
+                            type: integer
+                            example: 404
+                        message:
+                            type: string
+                            example: "Not Found"
+                        reason:
+                            type: string
+                            example: "Resource not found"
+                Response500:
+                    description: 'Internal Server Error'
+                    type: object
+                    properties:
+                        success:
+                            type: boolean
+                            example: false
+                        status:
+                            type: integer
+                            example: 500
+                        reason:
+                            type: string
+                            example: "Internal Server Error"
+        info:
+            title: PicsManager
+            description: Epitech project
+            version: 1.0.0
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api/albums
+            #- ^/api(?!/doc$) # Accepts routes under /api except /api/doc
