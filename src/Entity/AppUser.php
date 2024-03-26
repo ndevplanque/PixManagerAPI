@@ -9,6 +9,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -18,13 +20,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: "email", message: "Email already used")]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['users','shared'])]
+    #[Groups(['users', 'shared'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['users', 'albums','shared'])]
+    #[Groups(['users', 'albums', 'shared'])]
     #[ORM\Column(length: 255)]
     #[Assert\Email(
         message: "Email {{ value }} are not a valid email")
@@ -90,6 +92,7 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this->email;
     }
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -227,28 +230,23 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-/*    public function getUsername(): string
-    {
-        return explode('@', $this->email)[0];
-    }*/
-
-    public function newAlbum(): Album
+    public function newAlbum(string $name = null): Album
     {
         $album = new Album();
         $this->addOwnedAlbum($album);
-        $album->setName('Default');
+        $album->setName($name ?? 'Default');
         return $album;
     }
 
     /**
      * @return Collection<int, Photo>
      */
-    public function getPhotos(): Collection
+    public function getOwnedPhotos(): Collection
     {
         return $this->photos;
     }
 
-    public function addPhoto(Photo $photo): static
+    public function addOwnedPhoto(Photo $photo): static
     {
         if (!$this->photos->contains($photo)) {
             $this->photos->add($photo);
@@ -258,7 +256,7 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removePhoto(Photo $photo): static
+    public function removeOwnedPhoto(Photo $photo): static
     {
         if ($this->photos->removeElement($photo)) {
             // set the owning side to null (unless already changed)
@@ -275,8 +273,88 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function newPhoto(string $name = null, Album $album = null): Photo
     {
-        $this->addPhoto($photo = new Photo($name));
+        $this->addOwnedPhoto($photo = new Photo($name));
         $photo->setAlbum($album ?? $this->getOwnedAlbums()->first());
         return $photo;
+    }
+
+    public function getSharedPhotos(): Collection
+    {
+        $sharedAlbums = $this->getSharedAlbums();
+        $sharedPhotos = $sharedAlbums->get(0)->getPhotos();
+
+        for ($i = 1; $i < count($sharedAlbums); $i++) {
+            foreach ($sharedAlbums->get($i)->getPhotos() as $photo) {
+                $sharedPhotos->add($photo);
+            }
+        }
+
+        return $sharedPhotos;
+    }
+
+    public function getAllPhotos(): Collection
+    {
+        $photos = $this->photos;
+
+        foreach ($this->shared_albums as $sharedAlbum) {
+            foreach ($sharedAlbum->getPhotos() as $photo) {
+                $photos->add($photo);
+            }
+        }
+
+        return $photos;
+    }
+
+    public function equals(?AppUser $user): bool
+    {
+        return $user !== null && $this->getId() === $user->getId();
+    }
+
+    public function shouldBe(?AppUser $user): void
+    {
+        if ($this->equals($user)) {
+            return;
+        }
+
+        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Wrong identity.');
+    }
+
+    public function shouldHaveAccessToPhoto(?Photo $photo): void
+    {
+        if ($photo === null) {
+            return;
+        }
+
+        $this->shouldHaveAccessToAlbum($photo->getAlbum());
+    }
+
+    public function shouldHaveAccessToAlbum(?Album $album): void
+    {
+        if ($album === null) {
+            return;
+        }
+
+        foreach ($this->owned_albums as $ownedAlbum) {
+            if ($album->equals($ownedAlbum)) {
+                return;
+            }
+        }
+
+        foreach ($this->shared_albums as $sharedAlbum) {
+            if ($album->equals($sharedAlbum)) {
+                return;
+            }
+        }
+
+        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'You cannot see this album.');
+    }
+
+    public function shouldBeAdmin(): void
+    {
+        if ($this->is_admin === true || in_array('ROLE_ADMIN', $this->roles)) {
+            return;
+        }
+
+        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'You do not have admin privileges.');
     }
 }

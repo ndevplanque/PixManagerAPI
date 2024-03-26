@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Photo;
 
+use App\Entity\AppUser;
 use App\Entity\Photo;
 use App\Repository\LabelRepository;
 use App\Response\PhotoListingByLabelResponse;
@@ -18,7 +19,7 @@ class PhotoListingByLabelService
     {
     }
 
-    public function handle(string $labelName): PhotoListingByLabelResponse
+    public function handle(AppUser $user, string $labelName): PhotoListingByLabelResponse
     {
         $label = $this->labelRepository->findOneBy(['name' => $labelName]);
 
@@ -26,21 +27,18 @@ class PhotoListingByLabelService
             throw new HttpException(404, "Label $labelName not found!");
         }
 
-        // todo: get user from jwt instead
-        $user = $label->getPhotos()->first()->getOwner();
-
         $photos = [];
 
-        foreach ($user->getOwnedAlbums()->getIterator() as $album) {
-            foreach ($album->getPhotos()->getIterator() as $photo) {
+        foreach ($user->getOwnedAlbums() as $album) {
+            foreach ($album->getPhotos() as $photo) {
                 if ($photo->getLabels()->contains($label)) {
                     $photos[] = $photo;
                 }
             }
         }
 
-        foreach ($user->getSharedAlbums()->getIterator() as $album) {
-            foreach ($album->getPhotos()->getIterator() as $photo) {
+        foreach ($user->getSharedAlbums() as $album) {
+            foreach ($album->getPhotos() as $photo) {
                 if ($photo->getLabels()->contains($label)) {
                     $photos[] = $photo;
                 }

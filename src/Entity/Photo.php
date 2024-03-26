@@ -40,6 +40,15 @@ class Photo
     {
         $this->created_at = new DateTimeImmutable();
         $this->labels = new ArrayCollection();
+
+        if ($name !== null) {
+            // replace any non letter/non number/non dot by a _
+            $name = preg_replace('/[^a-zA-Z0-9.]/', '_', $name);
+
+            // replace multiple _ by one _
+            $name = preg_replace('/_+/', '_', $name);
+        }
+
         $this->name = $name;
     }
 
@@ -132,5 +141,32 @@ class Photo
         $this->owner = $owner;
 
         return $this;
+    }
+
+    /**
+     * @return int - Accuracy score : the least, the most accurate
+     */
+    public function getAccuracyScore(string $search): int
+    {
+        $labels = join(' ', array_map(fn(Label $label)=>$label->getName(), $this->labels->getValues()));
+        $name = str_replace("_", " ", $this->name);
+        $album = $this->album->getName();
+        $compareString = "$labels $name $album";
+
+        $distance = levenshtein(
+            string1: metaphone($search),
+            string2: metaphone($compareString),
+            insertion_cost: 10,
+            replacement_cost: 20,
+            deletion_cost: 30,
+        );
+
+        similar_text(
+            string1: $search,
+            string2: $compareString,
+            percent: $similarity,
+        );
+
+        return (int)($distance * 100 / $similarity);
     }
 }

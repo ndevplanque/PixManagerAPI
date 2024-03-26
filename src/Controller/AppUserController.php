@@ -40,16 +40,4 @@ class AppUserController extends AbstractController
         $json = $serializer->serialize($users, 'json', ['groups' => ['users']]);
         return $this->jsonHelper->send($json);
     }
-
-    #[Route('/api/users/{id}', name: 'deleteUser', methods: ['DELETE'])]
-    public function deleteUser(
-        AppUser                $user,
-        EntityManagerInterface $entityManager,
-    ): JsonResponse
-    {
-        $entityManager->remove($user);
-        $entityManager->flush();
-
-        return $this->jsonHelper->noContent();
-    }
 }

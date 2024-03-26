@@ -2,15 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Utils;
+namespace App\Repository;
 
 use App\Entity\Photo;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 
-class FileHelper
+class FileRepository
 {
     const PHOTO_DIR = 'assets/photos/';
 
@@ -18,20 +16,14 @@ class FileHelper
     {
     }
 
-    public function storeUploadedPhotoFile(Photo $photo, UploadedFile $uploaded): void
+    public function insert(Photo $photo, UploadedFile $uploaded): void
     {
         $this->filesystem->copy($uploaded->getRealPath(), $this->getStoragePath($photo));
     }
 
-    public function sendPhoto(Photo $photo): BinaryFileResponse
+    public function delete(Photo $photo): void
     {
-        return new BinaryFileResponse(
-            file: $this->getStoragePath($photo),
-            headers: ['Content-Disposition' => HeaderUtils::makeDisposition(
-                HeaderUtils::DISPOSITION_ATTACHMENT,
-                $photo->getName(),
-            )]
-        );
+        $this->filesystem->remove($this->getStoragePath($photo));
     }
 
     public function getStoragePath(Photo $photo): string
