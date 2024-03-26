@@ -21,7 +21,13 @@ class TokenSubscriber implements EventSubscriberInterface
         ControllerEvent $event,
     ): void
     {
-        $email = $this->tokenStorage->getToken()->getUserIdentifier();
+        $token = $this->tokenStorage->getToken();
+
+        if ($token === null) {
+            return;
+        }
+
+        $email = $token->getUserIdentifier();
         $user = $this->appUserRepository->findOneBy(['email' => $email]);
         $event->getRequest()->attributes->set('requester', $user);
     }
