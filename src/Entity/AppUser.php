@@ -319,6 +319,18 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Wrong identity.');
     }
 
+    public function shouldBeOneOf(array $appUsers): void
+    {
+        foreach ($appUsers as $user) {
+            /** @var ?AppUser $user */
+            if ($this->equals($user)) {
+                return;
+            }
+        }
+
+        throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Wrong identity.');
+    }
+
     public function shouldHaveAccessToPhoto(?Photo $photo): void
     {
         if ($photo === null) {
