@@ -33,7 +33,6 @@ class PhotoController extends AbstractController
     {
     }
 
-
     #[Route('/api/photos', name: 'listPhoto', methods: ['GET'])]
     /**
      * List the photos of the requester.
@@ -158,7 +157,10 @@ class PhotoController extends AbstractController
         PhotoDeleteService $photoDeleteService,
     ): JsonResponse
     {
-        $this->requestHelper->getUser($request)->shouldBe($photo->getOwner());
+        $this->requestHelper->getUser($request)->shouldBeOneOf([
+            $photo->getOwner(),
+            $photo->getAlbum()->getOwner(),
+        ]);
 
         $photoDeleteService->handle($photo);
 
