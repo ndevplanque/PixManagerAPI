@@ -4,19 +4,35 @@ declare(strict_types=1);
 
 namespace App\Service\Photo;
 
-use App\Entity\AppUser;
-use App\Entity\Photo;
 use App\Response\PhotoListingByUserResponse;
 use App\Response\PhotoResponse;
+use App\Utils\RequestHelper;
+use Symfony\Component\HttpFoundation\Request;
 
 class PhotoListingByUserService
 {
-    public function handle(AppUser $user, ?string $search = null): PhotoListingByUserResponse
+    public function __construct(
+        private readonly RequestHelper $requestHelper,
+    )
     {
+    }
+
+    public function handle(Request $request): PhotoListingByUserResponse
+    {
+        $user = $this->requestHelper->getUser($request);
+
+        $search = $this->requestHelper->getQueryParam($request, 'search');
+        $search = $search !== null ? (string)$search : null;
+
+        $includeShared = $this->requestHelper->getQueryParam($request, 'include_shared');
+        $includeShared = $includeShared !== null ? (bool)$includeShared : null;
+
+        $collection = $includeShared ? $user->getAllPhotos() : $user->getOwnedPhotos();
+
         if ($search === null) {
             $photos = [];
 
-            foreach ($user->getPhotos()->getIterator() as $photo) {
+            foreach ($collection as $photo) {
                 $photos[] = new PhotoResponse($photo);
             }
 
@@ -26,7 +42,7 @@ class PhotoListingByUserService
         $photosById = [];
         $accuracyById = [];
 
-        foreach ($user->getPhotos()->getIterator() as $photo) {
+        foreach ($collection as $photo) {
             $photosById[$photo->getId()] = $photo;
             $accuracyById[$photo->getId()] = $photo->getAccuracyScore($search);
         }

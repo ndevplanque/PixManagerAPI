@@ -31,7 +31,7 @@ class AdminController extends AbstractController
     {
         $this->requestHelper->getUser($request)->shouldBeAdmin();
 
-        $listingByUserResponse = $photoListingByUserService->handle($user);
+        $listingByUserResponse = $photoListingByUserService->handle($request);
 
         return $this->jsonHelper->send(
             json_encode($listingByUserResponse->jsonSerialize())

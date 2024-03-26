@@ -145,13 +145,7 @@ class PhotoController extends AbstractController
         PhotoListingByUserService $photoListingByUserService,
     ): JsonResponse
     {
-        $user = $this->requestHelper->getUser($request);
-
-        $search = $this->requestHelper->getQueryParam($request, 'search');
-
-        $search = $search !== null ? (string)$search : null;
-
-        $listingByUserResponse = $photoListingByUserService->handle($user, $search);
+        $listingByUserResponse = $photoListingByUserService->handle($request);
 
         return $this->jsonHelper->send(
             json_encode($listingByUserResponse)
