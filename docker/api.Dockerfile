@@ -20,6 +20,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 WORKDIR /var/www
 
-RUN composer install
+RUN composer install && \
+    mkdir -p public/assets/photos && \
+    chown -R www-data public/assets && \
+    chmod -R 664 public/assets
 
 EXPOSE 80
