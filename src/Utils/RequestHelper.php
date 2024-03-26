@@ -20,9 +20,9 @@ class RequestHelper
         return $request->request->get($key);
     }
 
-    public function getUploadedFile(Request $request, string $key): UploadedFile
+    public function getUploadedFile(Request $request): UploadedFile
     {
-        return $request->files->get($key);
+        return $request->files->get('file');
     }
 
     public function getAttribute(Request $request, string $key): bool|float|int|null|string

@@ -40,6 +40,15 @@ class Photo
     {
         $this->created_at = new DateTimeImmutable();
         $this->labels = new ArrayCollection();
+
+        if ($name !== null) {
+            // replace any non letter/non number/non dot by a _
+            $name = preg_replace('/[^a-zA-Z0-9.]/', '_', $name);
+
+            // replace multiple _ by one _
+            $name = preg_replace('/_+/', '_', $name);
+        }
+
         $this->name = $name;
     }
 
@@ -140,7 +149,9 @@ class Photo
     public function getAccuracyScore(string $search): int
     {
         $labels = join(' ', array_map(fn(Label $label)=>$label->getName(), $this->labels->getValues()));
-        $compareString = "$labels $this->name";
+        $name = str_replace("_", " ", $this->name);
+        $album = $this->album->getName();
+        $compareString = "$labels $name $album";
 
         $distance = levenshtein(
             string1: metaphone($search),

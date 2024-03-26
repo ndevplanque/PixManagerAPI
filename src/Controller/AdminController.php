@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\AppUser;
+use App\Entity\Photo;
 use App\Service\Label\LabelDeleteService;
+use App\Service\Photo\PhotoDeleteService;
 use App\Service\Photo\PhotoListingByUserService;
 use App\Utils\JsonHelper;
 use App\Utils\RequestHelper;
@@ -22,8 +24,8 @@ class AdminController extends AbstractController
     {
     }
 
-    #[Route('/api/admin/photos/users/{id}', name: 'listPhotosByUserId', methods: ['GET'])]
-    public function listPhotosByUserId(
+    #[Route('/api/admin/photos/users/{id}', name: 'adminListPhotosByUserId', methods: ['GET'])]
+    public function adminListPhotosByUserId(
         Request                   $request,
         AppUser                   $user,
         PhotoListingByUserService $photoListingByUserService,
@@ -38,8 +40,8 @@ class AdminController extends AbstractController
         );
     }
 
-    #[Route('/api/admin/labels/{name}', name: 'deleteLabel', methods: ['DELETE'])]
-    public function deleteLabel(
+    #[Route('/api/admin/labels/{name}', name: 'adminDeleteLabel', methods: ['DELETE'])]
+    public function adminDeleteLabel(
         Request            $request,
         string             $name,
         LabelDeleteService $labelDeleteService,
@@ -52,8 +54,8 @@ class AdminController extends AbstractController
         return $this->jsonHelper->noContent();
     }
 
-    #[Route('/api/users/{id}', name: 'deleteUser', methods: ['DELETE'])]
-    public function deleteUser(
+    #[Route('/api/users/{id}', name: 'adminDeleteUser', methods: ['DELETE'])]
+    public function adminDeleteUser(
         Request                $request,
         AppUser                $user,
         EntityManagerInterface $entityManager,
@@ -63,6 +65,20 @@ class AdminController extends AbstractController
 
         $entityManager->remove($user);
         $entityManager->flush();
+
+        return $this->jsonHelper->noContent();
+    }
+
+    #[Route('/api/admin/photos/{id}', name: 'adminDeletePhoto', methods: ['DELETE'])]
+    public function adminDeletePhoto(
+        Request            $request,
+        Photo              $photo,
+        PhotoDeleteService $photoDeleteService,
+    ): JsonResponse
+    {
+        $this->requestHelper->getUser($request)->shouldBeAdmin();
+
+        $photoDeleteService->handle($photo);
 
         return $this->jsonHelper->noContent();
     }

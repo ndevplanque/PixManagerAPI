@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Album;
 use App\Entity\Photo;
+use App\Repository\FileRepository;
 use App\Service\Album\AlbumEnsureGetService;
 use App\Service\Photo\PhotoCreateService;
 use App\Service\Photo\PhotoDeleteService;
@@ -13,11 +14,11 @@ use App\Service\Photo\PhotoListingByAlbumService;
 use App\Service\Photo\PhotoListingByLabelService;
 use App\Service\Photo\PhotoListingByUserService;
 use App\Service\Photo\PhotoUpdateService;
-use App\Utils\FileHelper;
 use App\Utils\JsonHelper;
 use App\Utils\RequestHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,11 +26,30 @@ use Symfony\Component\Routing\Attribute\Route;
 class PhotoController extends AbstractController
 {
     public function __construct(
-        private readonly JsonHelper    $jsonHelper,
-        private readonly FileHelper    $fileHelper,
-        private readonly RequestHelper $requestHelper,
+        private readonly JsonHelper     $jsonHelper,
+        private readonly FileRepository $fileRepository,
+        private readonly RequestHelper  $requestHelper,
     )
     {
+    }
+
+
+    #[Route('/api/photos', name: 'listPhoto', methods: ['GET'])]
+    /**
+     * List the photos of the requester.
+     * '/api/photos?include_shared=true' to include photos shared by others.
+     * '/api/photos?search=blablabla' to sort by most accurate (compare photo name, labels names, and album name).
+     */
+    public function listPhoto(
+        Request                   $request,
+        PhotoListingByUserService $photoListingByUserService,
+    ): JsonResponse
+    {
+        $listingByUserResponse = $photoListingByUserService->handle($request);
+
+        return $this->jsonHelper->send(
+            json_encode($listingByUserResponse)
+        );
     }
 
     #[Route('/api/photos/albums/{id}', name: 'listPhotosByAlbumId', methods: ['GET'])]
@@ -48,35 +68,36 @@ class PhotoController extends AbstractController
         );
     }
 
-    #[Route('/api/photos/labels/{labelName}', name: 'listPhotosByLabelName', methods: ['GET'])]
+    #[Route('/api/photos/labels/{name}', name: 'listPhotosByLabelName', methods: ['GET'])]
     public function listPhotosByLabelName(
         Request                    $request,
-        string                     $labelName,
+        string                     $name,
         PhotoListingByLabelService $photoListingByLabelService,
     ): JsonResponse
     {
         $user = $this->requestHelper->getUser($request);
 
-        $listingByLabelResponse = $photoListingByLabelService->handle($user, $labelName);
+        $listingByLabelResponse = $photoListingByLabelService->handle($user, $name);
 
         return $this->jsonHelper->send(
             json_encode($listingByLabelResponse->jsonSerialize())
         );
     }
 
-    #[Route('/api/photos/albums/{id}', name: "createPhotoInAlbum", methods: ['POST'])]
-    public function createPhotoInAlbum(
-        Request            $request,
-        Album              $album,
-        PhotoCreateService $photoCreateService,
-    ): JsonResponse
+    #[Route('/api/photos/file/{id}', name: 'getPhotoFile', methods: ['GET'])]
+    public function getPhotoFile(
+        Request $request,
+        Photo   $photo,
+    ): BinaryFileResponse
     {
-        $this->requestHelper->getUser($request)->shouldHaveAccessToAlbum($album);
+        $this->requestHelper->getUser($request)->shouldHaveAccessToPhoto($photo);
 
-        $photoResponse = $photoCreateService->handle($request, $album);
-
-        return $this->jsonHelper->created(
-            json_encode($photoResponse->jsonSerialize())
+        return new BinaryFileResponse(
+            file: $this->fileRepository->getStoragePath($photo),
+            headers: ['Content-Disposition' => HeaderUtils::makeDisposition(
+                HeaderUtils::DISPOSITION_ATTACHMENT,
+                $photo->getName(),
+            )]
         );
     }
 
@@ -90,6 +111,22 @@ class PhotoController extends AbstractController
         $user = $this->requestHelper->getUser($request);
 
         $album = $albumEnsureGetService->handle($user);
+
+        $photoResponse = $photoCreateService->handle($request, $album);
+
+        return $this->jsonHelper->created(
+            json_encode($photoResponse->jsonSerialize())
+        );
+    }
+
+    #[Route('/api/photos/albums/{id}', name: "createPhotoInAlbum", methods: ['POST'])]
+    public function createPhotoInAlbum(
+        Request            $request,
+        Album              $album,
+        PhotoCreateService $photoCreateService,
+    ): JsonResponse
+    {
+        $this->requestHelper->getUser($request)->shouldHaveAccessToAlbum($album);
 
         $photoResponse = $photoCreateService->handle($request, $album);
 
@@ -126,29 +163,5 @@ class PhotoController extends AbstractController
         $photoDeleteService->handle($photo);
 
         return $this->jsonHelper->noContent();
-    }
-
-    #[Route('/api/photos/{id}', name: 'getPhotoFile', methods: ['GET'])]
-    public function getPhotoFile(
-        Request $request,
-        Photo   $photo,
-    ): BinaryFileResponse
-    {
-        $this->requestHelper->getUser($request)->shouldHaveAccessToPhoto($photo);
-
-        return $this->fileHelper->sendPhoto($photo);
-    }
-
-    #[Route('/api/photos', name: 'listPhoto', methods: ['GET'])]
-    public function listPhoto(
-        Request                   $request,
-        PhotoListingByUserService $photoListingByUserService,
-    ): JsonResponse
-    {
-        $listingByUserResponse = $photoListingByUserService->handle($request);
-
-        return $this->jsonHelper->send(
-            json_encode($listingByUserResponse)
-        );
     }
 }

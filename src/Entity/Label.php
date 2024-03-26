@@ -29,7 +29,7 @@ class Label
 
         if ($name !== null) {
             // replace any non letter/non number by a _
-            $name = preg_replace('/[^a-zA-Z0-9]/', '_', $name);
+            $name = preg_replace('/[^a-zA-Z0-9.]/', '_', $name);
 
             // replace multiple _ by one _
             $name = preg_replace('/_+/', '_', $name);
