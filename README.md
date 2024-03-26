@@ -26,7 +26,7 @@ php bin/console doctrine:fixtures:load
 - Se connecter pour vérifier que tout est bon
 
 ```sh
-symfony run psql --dbname=pix_manager --username=postgres
+psql --dbname=picturesmanager --username=symfony
 pix_manager=# \dt
 pix_manager=# select * from app_user;
 ```

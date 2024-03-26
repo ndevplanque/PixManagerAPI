@@ -21,16 +21,14 @@ class PhotoFactory
 
     public function fromRequestAndAlbum(Request $request, Album $album): Photo
     {
-        $labels = json_decode(
-            $this->requestHelper->getBodyParam($request, 'labels')
-        );
+        $json = $this->requestHelper->getBodyParam($request, 'labels');
 
-        $file = $this->requestHelper->getUploadedFile($request, 'file');
+        $labels = $json !== null ? json_decode($json) : [];
 
-        //todo: get the owner from jwt instead
-        $owner = $album->getOwner();
+        $file = $this->requestHelper->getUploadedFile($request);
 
-        $photo = $owner->newPhoto($file->getClientOriginalName(), $album);
+        $photo = $this->requestHelper->getUser($request)
+            ->newPhoto($file->getClientOriginalName(), $album);
 
         for ($i = 0; $i < count($labels); $i++) {
             $photo->addLabel(

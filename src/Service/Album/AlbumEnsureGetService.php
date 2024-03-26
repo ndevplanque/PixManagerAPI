@@ -20,7 +20,7 @@ class AlbumEnsureGetService
 
         if (!$album) {
             $album = $this->albumRepository->insert(
-                $user->newAlbum('Unnamed')
+                $user->newAlbum('Default')
             );
         }
 

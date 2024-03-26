@@ -29,16 +29,16 @@ class PhotoListingByLabelService
 
         $photos = [];
 
-        foreach ($user->getOwnedAlbums()->getIterator() as $album) {
-            foreach ($album->getPhotos()->getIterator() as $photo) {
+        foreach ($user->getOwnedAlbums() as $album) {
+            foreach ($album->getPhotos() as $photo) {
                 if ($photo->getLabels()->contains($label)) {
                     $photos[] = $photo;
                 }
             }
         }
 
-        foreach ($user->getSharedAlbums()->getIterator() as $album) {
-            foreach ($album->getPhotos()->getIterator() as $photo) {
+        foreach ($user->getSharedAlbums() as $album) {
+            foreach ($album->getPhotos() as $photo) {
                 if ($photo->getLabels()->contains($label)) {
                     $photos[] = $photo;
                 }

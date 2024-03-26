@@ -241,12 +241,12 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Photo>
      */
-    public function getPhotos(): Collection
+    public function getOwnedPhotos(): Collection
     {
         return $this->photos;
     }
 
-    public function addPhoto(Photo $photo): static
+    public function addOwnedPhoto(Photo $photo): static
     {
         if (!$this->photos->contains($photo)) {
             $this->photos->add($photo);
@@ -256,7 +256,7 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removePhoto(Photo $photo): static
+    public function removeOwnedPhoto(Photo $photo): static
     {
         if ($this->photos->removeElement($photo)) {
             // set the owning side to null (unless already changed)
@@ -273,9 +273,36 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function newPhoto(string $name = null, Album $album = null): Photo
     {
-        $this->addPhoto($photo = new Photo($name));
+        $this->addOwnedPhoto($photo = new Photo($name));
         $photo->setAlbum($album ?? $this->getOwnedAlbums()->first());
         return $photo;
+    }
+
+    public function getSharedPhotos(): Collection
+    {
+        $sharedAlbums = $this->getSharedAlbums();
+        $sharedPhotos = $sharedAlbums->get(0)->getPhotos();
+
+        for ($i = 1; $i < count($sharedAlbums); $i++) {
+            foreach ($sharedAlbums->get($i)->getPhotos() as $photo) {
+                $sharedPhotos->add($photo);
+            }
+        }
+
+        return $sharedPhotos;
+    }
+
+    public function getAllPhotos(): Collection
+    {
+        $photos = $this->photos;
+
+        foreach ($this->shared_albums as $sharedAlbum) {
+            foreach ($sharedAlbum->getPhotos() as $photo) {
+                $photos->add($photo);
+            }
+        }
+
+        return $photos;
     }
 
     public function equals(?AppUser $user): bool
@@ -307,13 +334,13 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
             return;
         }
 
-        foreach ($this->owned_albums->getIterator() as $ownedAlbum) {
+        foreach ($this->owned_albums as $ownedAlbum) {
             if ($album->equals($ownedAlbum)) {
                 return;
             }
         }
 
-        foreach ($this->shared_albums->getIterator() as $sharedAlbum) {
+        foreach ($this->shared_albums as $sharedAlbum) {
             if ($album->equals($sharedAlbum)) {
                 return;
             }
