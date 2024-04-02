@@ -18,6 +18,7 @@ class FileRepository
 
     public function insert(Photo $photo, UploadedFile $uploaded): void
     {
+        // todo : compress
         $this->filesystem->copy($uploaded->getRealPath(), $this->getStoragePath($photo));
     }
 

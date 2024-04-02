@@ -20,7 +20,7 @@ WORKDIR /var/www
 
 RUN composer install && \
     mkdir -p public/assets/photos && \
-    chown -R www-data public/assets && \
-    chmod -R 664 public/assets
+    chown -R www-data . && \
+    chmod -R 775 .
 
 EXPOSE 80
