@@ -2,7 +2,7 @@ FROM php:8.3-apache
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions pdo_pgsql intl http sodium
+RUN install-php-extensions pdo_pgsql intl http sodium gd
 
 RUN curl -sSk https://getcomposer.org/installer | php -- --disable-tls && \
     mv composer.phar /usr/local/bin/composer
@@ -24,3 +24,5 @@ RUN composer install && \
     chmod -R 775 .
 
 EXPOSE 80
+
+ENTRYPOINT ["./docker/entrypoint.sh"]

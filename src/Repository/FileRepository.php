@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Photo;
+use App\Service\Compressing\CompressingPhotoService;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -12,14 +13,19 @@ class FileRepository
 {
     const PHOTO_DIR = 'assets/photos/';
 
-    public function __construct(private readonly Filesystem $filesystem)
+    public function __construct(
+        private readonly Filesystem $filesystem,
+        private readonly CompressingPhotoService $compressingPhotoService
+    )
     {
     }
 
     public function insert(Photo $photo, UploadedFile $uploaded): void
     {
-        // todo : compress
-        $this->filesystem->copy($uploaded->getRealPath(), $this->getStoragePath($photo));
+        $pathToPhoto = $uploaded->getRealPath();
+        $pathToSave = $this->getStoragePath($photo);
+
+        $this->compressingPhotoService->compressingPhoto($pathToPhoto, $pathToSave);
     }
 
     public function delete(Photo $photo): void
