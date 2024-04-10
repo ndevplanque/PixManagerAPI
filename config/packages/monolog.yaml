@@ -1,0 +1,7 @@
+monolog:
+  handlers:
+    # le mieux c'est d'utiliser notice() car le framework utilise bcp info() et ça spam
+    response:
+      type: stream
+      path: "php://stdout"
+      level: notice
