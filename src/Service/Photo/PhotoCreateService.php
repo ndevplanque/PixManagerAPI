@@ -10,6 +10,7 @@ use App\Repository\FileRepository;
 use App\Repository\PhotoRepository;
 use App\Response\PhotoResponse;
 use App\Utils\RequestHelper;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
@@ -21,6 +22,7 @@ class PhotoCreateService
         private readonly PhotoFactory    $photoFactory,
         private readonly FileRepository  $fileRepository,
         private readonly RequestHelper   $requestHelper,
+        private readonly LoggerInterface $logger,
     )
     {
     }
@@ -32,13 +34,23 @@ class PhotoCreateService
         );
 
         try {
-            $this->fileRepository->insert(
-                $photo,
-                $this->requestHelper->getUploadedFile($request)
-            );
+            $uploadedFile = $this->requestHelper->getUploadedFile($request);
+        } catch (Throwable $e) {
+            throw new HttpException(400, 'File was not sent.');
+        }
+
+        try {
+            $this->fileRepository->insert($photo, $uploadedFile);
         } catch (Throwable $e) {
             $this->photoRepository->delete($photo);
-            throw new HttpException(500, 'Failed to save photo! Please try again.');
+
+            $error = $uploadedFile->getErrorMessage();
+
+            if (str_contains($error, 'exceeds your upload_max_filesize ini directive')) {
+                $error = 'Image is too big';
+            }
+
+            throw new HttpException(500, $error);
         }
 
         return new PhotoResponse($photo);
