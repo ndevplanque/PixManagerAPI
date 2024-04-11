@@ -39,13 +39,6 @@ class PhotoCreateService
             throw new HttpException(400, 'File was not sent.');
         }
 
-        $this->logger->notice(json_encode([
-            'size'=>$uploadedFile->getSize(),
-            'type'=>$uploadedFile->getType(),
-            'owner'=>$uploadedFile->getOwner(),
-            'content'=>$uploadedFile->getContent(),
-        ]));
-
         try {
             $this->fileRepository->insert($photo, $uploadedFile);
         } catch (Throwable $e) {

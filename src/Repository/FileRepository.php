@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileRepository
 {
-    const PHOTO_DIR = 'assets/photos/';
+    const PHOTO_DIR = '../resources/assets/photos/';
 
     public function __construct(private readonly Filesystem $filesystem)
     {
