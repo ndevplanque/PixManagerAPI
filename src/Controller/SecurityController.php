@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Utils\RequestHelper;
 
 #[Route('/api', name: 'app_user')]
 class SecurityController extends AbstractController
@@ -25,6 +26,8 @@ class SecurityController extends AbstractController
     public function __construct(
         private readonly JsonHelper $jsonHelper,
         private readonly ValidatorInterface $validator,
+        private readonly RequestHelper  $requestHelper,
+
     ) {
     }
 
@@ -101,9 +104,9 @@ class SecurityController extends AbstractController
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage,
     ): JsonResponse {
+        $user = $this->requestHelper->getUser($request);
         $data = json_decode($request->getContent(), true);
-
-        $email = $data['email'];
+        $email = $user->getEmail();
         $oldPassword = $data['oldPassword'];
         $newPassword = $data['newPassword'];
 

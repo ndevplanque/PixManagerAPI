@@ -116,7 +116,7 @@ class AlbumsManagementController extends AbstractController
         // Serialize the albums
         $jsonAlbumList = $serializer->serialize($albums, 'json', ['groups' => ['albums']]);
 
-        return new JsonResponse("Albums: $jsonAlbumList", Response::HTTP_OK, [], true);
+        return new JsonResponse( $jsonAlbumList, Response::HTTP_OK, [], true);
     }
     /**
      * This request return all the albums.
@@ -163,7 +163,7 @@ class AlbumsManagementController extends AbstractController
             throw new NotFoundHttpException("No albums found");
         }
         $jsonAlbumList = $serializer->serialize($albumList, 'json', ['groups' => ['albums']]);
-        return new JsonResponse("Albums: $jsonAlbumList", Response::HTTP_OK, [], true);
+        return new JsonResponse( $jsonAlbumList, Response::HTTP_OK, [], true);
     }
 
     /**
@@ -210,7 +210,7 @@ class AlbumsManagementController extends AbstractController
 
             $jsonAlbumList = $serializer->serialize($albums, 'json', ['groups' => ['albums']]);
 
-            return new JsonResponse("Albums: $jsonAlbumList", Response::HTTP_OK, [], true);
+            return new JsonResponse($jsonAlbumList, Response::HTTP_OK, [], true);
 
     }
     /**
