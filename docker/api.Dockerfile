@@ -20,8 +20,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 WORKDIR /var/www
 
-RUN composer install && \
-    mkdir -p resources/assets/photos && \
+RUN composer update
+
+RUN mkdir -p resources/assets/photos && \
     chown -R www-data . && \
     chmod -R 775 .
 
