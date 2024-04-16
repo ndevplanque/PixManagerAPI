@@ -7,17 +7,38 @@ namespace App\Service\Photo;
 use App\Entity\Album;
 use App\Entity\Photo;
 use App\Response\PhotoListingByAlbumResponse;
+use App\Response\PhotoListingByUserResponse;
 use App\Response\PhotoResponse;
+use App\Utils\ConverterTrait;
+use App\Utils\RequestHelper;
+use Symfony\Component\HttpFoundation\Request;
 
 class PhotoListingByAlbumService
 {
-    public function handle(Album $album): PhotoListingByAlbumResponse
+    use ConverterTrait;
+
+    public function __construct(
+        private readonly RequestHelper $requestHelper,
+    )
     {
-        return new PhotoListingByAlbumResponse(
-            array_map(
-                fn(Photo $photo) => new PhotoResponse($photo),
-                $album->getPhotos()->getValues()
-            )
+    }
+
+    public function handle(Request $request, Album $album): PhotoListingByAlbumResponse
+    {
+        $user = $this->requestHelper->getUser($request);
+
+        $result = $user->searchPhotos(
+            self::asString($this->requestHelper->getQueryParam($request, 'search')),
+            self::asBool($this->requestHelper->getQueryParam($request, 'include_shared')),
+            $album,
         );
+
+        $photos = [];
+
+        foreach ($result as $photo) {
+            $photos[] = new PhotoResponse($photo);
+        }
+
+        return new PhotoListingByAlbumResponse($photos);
     }
 }
