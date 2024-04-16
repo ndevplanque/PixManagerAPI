@@ -42,6 +42,8 @@ class PhotoCreateService
         try {
             $this->fileRepository->insert($photo, $uploadedFile);
         } catch (Throwable $e) {
+            $this->logger->error($e->getMessage());
+
             $this->photoRepository->delete($photo);
 
             $error = $uploadedFile->getErrorMessage();
