@@ -6,11 +6,14 @@ namespace App\Service\Photo;
 
 use App\Response\PhotoListingByUserResponse;
 use App\Response\PhotoResponse;
+use App\Utils\ConverterTrait;
 use App\Utils\RequestHelper;
 use Symfony\Component\HttpFoundation\Request;
 
 class PhotoListingByUserService
 {
+    use ConverterTrait;
+
     public function __construct(
         private readonly RequestHelper $requestHelper,
     )
@@ -21,43 +24,17 @@ class PhotoListingByUserService
     {
         $user = $this->requestHelper->getUser($request);
 
-        $search = $this->requestHelper->getQueryParam($request, 'search');
-        $search = $search !== null ? (string)$search : null;
+        $result = $user->searchPhotos(
+            self::asString($this->requestHelper->getQueryParam($request, 'search')),
+            self::asBool($this->requestHelper->getQueryParam($request, 'include_shared')),
+        );
 
-        $includeShared = $this->requestHelper->getQueryParam($request, 'include_shared');
-        $includeShared = $includeShared !== null ? (bool)$includeShared : null;
+        $photos = [];
 
-        $collection = $includeShared ? $user->getAllPhotos() : $user->getOwnedPhotos();
-
-        if ($search === null) {
-            $photos = [];
-
-            foreach ($collection as $photo) {
-                $photos[] = new PhotoResponse($photo);
-            }
-
-            return new PhotoListingByUserResponse($photos);
+        foreach ($result as $photo) {
+            $photos[] = new PhotoResponse($photo);
         }
 
-        $photosById = [];
-        $accuracyById = [];
-
-        foreach ($collection as $photo) {
-            $photosById[$photo->getId()] = $photo;
-            $accuracyById[$photo->getId()] = $photo->getAccuracyScore($search);
-        }
-
-        // Sort array by ascending values (because accuracyScore = the least, the most accurate)
-        asort($accuracyById);
-
-        $idsByAccury = array_keys($accuracyById);
-
-        $photosByAccuracy = [];
-
-        foreach ($idsByAccury as $id) {
-            $photosByAccuracy[] = new PhotoResponse($photosById[$id]);
-        }
-
-        return new PhotoListingByUserResponse($photosByAccuracy);
+        return new PhotoListingByUserResponse($photos);
     }
 }

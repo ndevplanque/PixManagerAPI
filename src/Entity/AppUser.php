@@ -305,6 +305,46 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $photos;
     }
 
+    public function searchPhotos(
+        ?string $search,
+        ?bool   $includeShared,
+        ?Album  $album = null,
+    )
+    {
+        $collection = $includeShared ? $this->getAllPhotos() : $this->getOwnedPhotos();
+
+        if ($album !== null) {
+            $collection = $collection->filter(
+                fn(Photo $photo) => $photo->getAlbum()->equals($album)
+            );
+        }
+
+        if ($search === null) {
+            return $collection;
+        }
+
+        $photosById = [];
+        $accuracyById = [];
+
+        foreach ($collection as $photo) {
+            $photosById[$photo->getId()] = $photo;
+            $accuracyById[$photo->getId()] = $photo->getAccuracyScore($search);
+        }
+
+        // Sort array by ascending values (because accuracyScore = the least, the most accurate)
+        asort($accuracyById);
+
+        $idsByAccury = array_keys($accuracyById);
+
+        $photos = [];
+
+        foreach ($idsByAccury as $id) {
+            $photos[] = $photosById[$id];
+        }
+
+        return $photos;
+    }
+
     public function equals(?AppUser $user): bool
     {
         return $user !== null && $this->getId() === $user->getId();

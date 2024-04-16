@@ -52,6 +52,11 @@ class PhotoController extends AbstractController
     }
 
     #[Route('/api/photos/albums/{id}', name: 'listPhotosByAlbumId', methods: ['GET'])]
+    /**
+     * List the photos of the requester.
+     * '/api/photos/albums/{id}?include_shared=true' to include photos shared by others.
+     * '/api/photos/albums/{id}?search=blablabla' to sort by most accurate (compare photo name, labels names, and album name).
+     */
     public function listPhotosByAlbumId(
         Request                    $request,
         Album                      $album,
@@ -60,7 +65,7 @@ class PhotoController extends AbstractController
     {
         $this->requestHelper->getUser($request)->shouldBe($album->getOwner());
 
-        $listingByAlbumResponse = $photoListingByAlbumService->handle($album);
+        $listingByAlbumResponse = $photoListingByAlbumService->handle($request, $album);
 
         return $this->jsonHelper->send(
             json_encode($listingByAlbumResponse->jsonSerialize())
