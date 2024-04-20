@@ -276,18 +276,7 @@ class AlbumsManagementController extends AbstractController
     public function createAlbum(Request $request, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
     {
         $album = $serializer->deserialize($request->getContent(), Album::class, 'json');
-        $requestArray = ($request->toArray());
-        if (!array_key_exists("owner", $requestArray)) {
-            throw new BadRequestException('Owner required', 400);
-        }
-        $id = ($requestArray["owner"]);
-        $ownerEntity = $em->getRepository(AppUser::class)->find($id);
-        if (!$album->getName()) {
-            throw new NotFoundException("album");
-        }
-        if (!$ownerEntity) {
-            throw new BadRequestException('Owner not found', 400);
-        }
+        $ownerEntity = $this->requestHelper->getUser($request);
         $album->setOwner($ownerEntity);
         $album->setCreatedAtValue();
         $em->persist($album);
