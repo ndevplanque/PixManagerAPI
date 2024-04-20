@@ -4,9 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Album;
 use App\Entity\AppUser;
-use App\Exception\DocError;
 use App\Exception\NotFoundException;
 use App\Repository\AlbumRepository;
+use App\Repository\AppUserRepository;
+use App\Utils\RequestHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,6 +26,10 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api/albums')]
 class AlbumsManagementController extends AbstractController
 {
+    public function __construct(
+        private readonly RequestHelper  $requestHelper,
+    )    {
+    }
     /**
      * This request return album depending on the id.
      */
@@ -66,7 +71,7 @@ class AlbumsManagementController extends AbstractController
     public function get_one(Album $album, SerializerInterface $serializer): JsonResponse
     {
         $jsonAlbumList = $serializer->serialize($album, 'json', ['groups' => ['albums']]);
-        return new JsonResponse("Albums: $jsonAlbumList", Response::HTTP_OK, [], true);
+        return new JsonResponse($jsonAlbumList, Response::HTTP_OK, [], true);
     }
     /**
      * This request returns albums owned by a specific user.
@@ -208,6 +213,7 @@ class AlbumsManagementController extends AbstractController
                 throw new NotFoundHttpException("No albums found with name: $name");
             }
 
+
             $jsonAlbumList = $serializer->serialize($albums, 'json', ['groups' => ['albums']]);
 
             return new JsonResponse($jsonAlbumList, Response::HTTP_OK, [], true);
@@ -344,6 +350,9 @@ class AlbumsManagementController extends AbstractController
     #[Route('/{id}', methods: ['PUT'])]
     public function update(Request $request, Album $currentAlbum, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
     {
+        $this->requestHelper->getUser($request)->shouldBeOneOf([
+            $currentAlbum->getOwner()
+        ]);
         $album = $serializer->deserialize($request->getContent(), Album::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentAlbum]);
         $requestArray = ($request->toArray());
         $name = $requestArray["name"];
@@ -407,22 +416,37 @@ class AlbumsManagementController extends AbstractController
     #[OA\Tag(name: 'Albums')]
     #[Security(name: 'Bearer')]
     #[Route('/share/{id}', methods: ['PUT'])]
-    public function updateVisibility(Request $request, Album $currentAlbum, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
+    public function updateVisibility(Request $request, Album $currentAlbum, SerializerInterface $serializer, AppUserRepository   $userRepository,EntityManagerInterface $em): JsonResponse
     {
+        $this->requestHelper->getUser($request)->shouldBeOneOf([
+            $currentAlbum->getOwner()
+        ]);
         $album = $serializer->deserialize($request->getContent(), Album::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentAlbum]);
         $requestArray = ($request->toArray());
         if (array_key_exists("newUserId", $requestArray)) {
-            $userId = $requestArray["newUserId"];
-            $userEntity = $em->getRepository(AppUser::class)->find($userId);
-            $album->addSharedTo($userEntity);
-            $em->persist($album);
-            $em->flush();
+            $email = $requestArray["newUserId"];
+            $userEntity = $userRepository->findOneBy(['email' => $email]);
+            if(!$userEntity==null){
+                $album->addSharedTo($userEntity);
+                $em->persist($album);
+                $em->flush();
+            }
+            //throw new BadRequestException('[Share_Albums_ADD]User does not exist when sharing', 400);
+
         }
         if (array_key_exists("deleteUserId", $requestArray)) {
-            $deleteUser = $requestArray["deleteUserId"];
-            $userEntity = $em->getRepository(AppUser::class)->find($deleteUser);
-            $album->getSharedTo()->removeElement($userEntity);
-            $em->flush();
+            $deleteUserEmail = $requestArray["deleteUserId"];
+            $userEntityDel = $userRepository->findOneBy(['email' => $deleteUserEmail]);
+            if (!$userEntityDel == null) {
+                $album->removeSharedTo($userEntityDel);
+                $em->persist($album);
+                $em->flush();
+                $jsonAlbum = $serializer->serialize($album->getSharedTo(), 'json', ['groups' => 'shared']);
+                return new JsonResponse($jsonAlbum, Response::HTTP_CREATED, [], true);
+            }
+            //throw new BadRequestException('[Share_Albums_DELETE]User does not exist in your shared list', 400);
+            $album->getSharedTo()->removeElement($userEntityDel);
+
         }
         $jsonAlbum = $serializer->serialize($album, 'json', ['groups' => 'shared']);
         return new JsonResponse($jsonAlbum, Response::HTTP_CREATED, [], true);
