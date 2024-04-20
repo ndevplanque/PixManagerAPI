@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: AlbumRepository::class)]
 class Album
 {
-    #[Groups(['users', 'albums'])]
+    #[Groups(['users', 'albums','shared'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
