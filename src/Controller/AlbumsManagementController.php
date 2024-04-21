@@ -430,12 +430,7 @@ class AlbumsManagementController extends AbstractController
                 $album->removeSharedTo($userEntityDel);
                 $em->persist($album);
                 $em->flush();
-                $jsonAlbum = $serializer->serialize($album->getSharedTo(), 'json', ['groups' => 'shared']);
-                return new JsonResponse($jsonAlbum, Response::HTTP_CREATED, [], true);
             }
-            //throw new BadRequestException('[Share_Albums_DELETE]User does not exist in your shared list', 400);
-            $album->getSharedTo()->removeElement($userEntityDel);
-
         }
         $jsonAlbum = $serializer->serialize($album, 'json', ['groups' => 'shared']);
         return new JsonResponse($jsonAlbum, Response::HTTP_CREATED, [], true);
