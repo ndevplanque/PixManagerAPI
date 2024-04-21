@@ -3,8 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Album;
-use App\Entity\AppUser;
-use App\Exception\NotFoundException;
 use App\Repository\AlbumRepository;
 use App\Repository\AppUserRepository;
 use App\Utils\RequestHelper;
@@ -113,12 +111,10 @@ class AlbumsManagementController extends AbstractController
     #[Security(name: 'Bearer')]
     public function getAlbumsByUser(int $id, AlbumRepository $albumRepository, SerializerInterface $serializer): JsonResponse
     {
-        // Fetch albums by user ID
         $albums = $albumRepository->findBy(['owner' => $id]);
         if (empty($albums)) {
             throw new NotFoundHttpException("No albums found for user with ID $id");
         }
-        // Serialize the albums
         $jsonAlbumList = $serializer->serialize($albums, 'json', ['groups' => ['albums']]);
 
         return new JsonResponse( $jsonAlbumList, Response::HTTP_OK, [], true);

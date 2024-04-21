@@ -15,11 +15,13 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use OpenApi\Attributes as OA;
 
 #[ORM\Entity(repositoryClass: AppUserRepository::class)]
 #[UniqueEntity(fields: "email", message: "Email already used")]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
+
     #[Groups(['users', 'shared'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
