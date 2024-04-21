@@ -109,8 +109,12 @@ class AlbumsManagementController extends AbstractController
     )]
     #[OA\Tag(name: 'Albums')]
     #[Security(name: 'Bearer')]
-    public function getAlbumsByUser(int $id, AlbumRepository $albumRepository, SerializerInterface $serializer): JsonResponse
+    public function getAlbumsByUser($id, AlbumRepository $albumRepository, SerializerInterface $serializer): JsonResponse
     {
+        if (!is_numeric($id)) {
+            throw new BadRequestHttpException("Invalid user ID format. ID must be numeric.");
+        }
+        $id = (int) $id;
         $albums = $albumRepository->findBy(['owner' => $id]);
         if (empty($albums)) {
             throw new NotFoundHttpException("No albums found for user with ID $id");
