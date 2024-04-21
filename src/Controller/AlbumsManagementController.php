@@ -109,13 +109,23 @@ class AlbumsManagementController extends AbstractController
     )]
     #[OA\Tag(name: 'Albums')]
     #[Security(name: 'Bearer')]
-    public function getAlbumsByUser($id, AlbumRepository $albumRepository, SerializerInterface $serializer): JsonResponse
+    public function getAlbumsByUser($id, AlbumRepository $albumRepository, SerializerInterface $serializer,Request $request,): JsonResponse
     {
         if (!is_numeric($id)) {
             throw new BadRequestHttpException("Invalid user ID format. ID must be numeric.");
         }
-        $id = (int) $id;
-        $albums = $albumRepository->findBy(['owner' => $id]);
+        $id = (int) $id;$user = $this->requestHelper->getUser($request);
+
+        if ($user->getId() !== $id) {
+            throw new BadRequestHttpException("Unauthorized: You do not have access to this resource.");
+        }
+        $albums = $albumRepository->createQueryBuilder('a')
+            ->where('a.owner = :ownerId')
+            ->orWhere(':userId MEMBER OF a.shared_to')
+            ->setParameter('ownerId', $id)
+            ->setParameter('userId', $id)
+            ->getQuery()
+            ->getResult();
         if (empty($albums)) {
             throw new NotFoundHttpException("No albums found for user with ID $id");
         }
