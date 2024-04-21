@@ -29,7 +29,7 @@ class PhotoListingByUserServiceTest extends TestCase
         $request = $this->createMock(Request::class);
 
         $user = $this->createConfiguredMock(AppUser::class, [
-            'getOwnedPhotos' => new ArrayCollection([
+            'searchPhotos' => new ArrayCollection([
                 $photo1 = $this->createMock(Photo::class),
                 $photo2 = $this->createMock(Photo::class),
             ])

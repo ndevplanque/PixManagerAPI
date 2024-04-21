@@ -11,6 +11,7 @@ use App\Response\PhotoResponse;
 use App\Service\Photo\PhotoCreateService;
 use App\Utils\RequestHelper;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -21,6 +22,8 @@ class PhotoCreateServiceTest extends TestCase
     private readonly PhotoFactory $photoFactory;
     private readonly FileRepository $fileRepository;
     private readonly RequestHelper $requestHelper;
+    private readonly LoggerInterface $logger;
+
 
     public function setUp(): void
     {
@@ -29,6 +32,7 @@ class PhotoCreateServiceTest extends TestCase
             $this->photoFactory = $this->createMock(PhotoFactory::class),
             $this->fileRepository = $this->createMock(FileRepository::class),
             $this->requestHelper = $this->createMock(RequestHelper::class),
+            $this->logger = $this->createMock(LoggerInterface::class),
         );
     }
 
