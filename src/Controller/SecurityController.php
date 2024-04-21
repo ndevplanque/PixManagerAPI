@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\AppUser;
 use App\Utils\JsonHelper;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Model\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,6 +16,8 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Utils\RequestHelper;
+use OpenApi\Attributes as OA;
+
 
 #[Route('/api', name: 'app_user')]
 class SecurityController extends AbstractController
@@ -41,6 +44,43 @@ class SecurityController extends AbstractController
      * @param UserPasswordHasherInterface $hasher
      * @return JsonResponse
      */
+    #[OA\Post(
+        path: '/api/register',
+        description: 'Create a new user from an HTTP request.',
+        requestBody: new OA\RequestBody(
+            content: new OA\MediaType(
+                mediaType: "application/json",
+                schema: new OA\Schema(ref: "#/components/schemas/AppUser")
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'User created successfully',
+                content: new OA\MediaType(
+                    mediaType: "application/json",
+                    schema: new OA\Schema(ref: "#/components/schemas/AppUser")
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Validation errors',
+                content: new OA\MediaType(
+                    mediaType: "application/json",
+                    schema: new OA\Schema(ref: "#/components/schemas/Response400")
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Server error',
+                content: new OA\MediaType(
+                    mediaType: "application/json",
+                    schema: new OA\Schema(ref: "#/components/schemas/Response500")
+                )
+            )
+        ]
+    )]
+    #[OA\Tag(name: 'Users')]
     #[Route('/register', name: 'app_user_register', methods: ['POST'])]
     public function createUser(
         Request                $request,
@@ -97,6 +137,37 @@ class SecurityController extends AbstractController
      * @param TokenStorageInterface $tokenStorage
      * @return JsonResponse
      */
+    #[OA\Put(
+        path: '/api/password',
+        description: 'Update user password from an HTTP request.',
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Password updated successfully',
+                content: new OA\MediaType(
+                    mediaType: "application/json",
+                    schema: new OA\Schema(ref: "#/components/schemas/PasswordUpdateResponse")
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Invalid credentials or request format',
+                content: new OA\MediaType(
+                    mediaType: "application/json",
+                    schema: new OA\Schema(ref: "#/components/schemas/Response400")
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthorized',
+                content: new OA\MediaType(
+                    mediaType: "application/json",
+                    schema: new OA\Schema(ref: "#/components/schemas/UnauthorizedResponse")
+                )
+            )
+        ]
+    )]
+    #[OA\Tag(name: 'Users')]
     #[Route('/password', name: 'app_user_password', methods: ['PUT'])]
     public function updatePassword(
         Request $request,
@@ -141,7 +212,6 @@ class SecurityController extends AbstractController
      * @param Request $request
      * @param SerializerInterface $serializer
      * @param UserPasswordHasherInterface $hasher
-     * @param AppUserRepository $appUserRepository
      * @return JsonResponse
      */
 //    #[Route('/login', name: 'app_user_login', methods: ['POST'])]

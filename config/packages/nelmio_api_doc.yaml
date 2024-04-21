@@ -1,58 +1,213 @@
 nelmio_api_doc:
-    documentation:
-        components:
-            schemas:
+  documentation:
+    components:
+      schemas:
+        AppUser:
+          type: object
+          description: 'User entity'
+          required:
+            - email
+            - password
+          properties:
+            id:
+              type: integer
+              format: int32
+              description: 'Unique identifier for the user'
+            email:
+              type: string
+              description: 'Email address of the user'
+              example: 'example@example.com'
+            password:
+              type: string
+              description: 'Hashed password of the user'
+            roles:
+              type: array
+              description: 'Roles assigned to the user'
+              items:
+                type: string
+            is_admin:
+              type: boolean
+              description: 'Indicates if the user has admin privileges'
+              example: false
+            owned_albums:
+              type: array
+              description: 'Albums owned by the user'
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  owner:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+            shared_albums:
+              type: array
+              description: 'Albums shared with the user'
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
 
-                Response400:
-                    type: object
-                    properties:
-                        success:
-                            type: boolean
-                            example: false
-                        status:
-                            type: integer
-                            example: 400
-                        message:
-                            type: string
-                            example: "Bad Body"
-                        reason:
-                            type: string
-                            example: "Bad Request"
-                Response404:
-                    response: 404,
-                    description: 'Not found'
-                    type: object
-                    properties:
-                        success:
-                            type: boolean
-                            example: false
-                        status:
-                            type: integer
-                            example: 404
-                        message:
-                            type: string
-                            example: "Not Found"
-                        reason:
-                            type: string
-                            example: "Resource not found"
-                Response500:
-                    description: 'Internal Server Error'
-                    type: object
-                    properties:
-                        success:
-                            type: boolean
-                            example: false
-                        status:
-                            type: integer
-                            example: 500
-                        reason:
-                            type: string
-                            example: "Internal Server Error"
-        info:
-            title: PicsManager
-            description: Epitech project
-            version: 1.0.0
-    areas: # to filter documented areas
-        path_patterns:
-            - ^/api/albums
-            #- ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+        Label:
+          type: object
+          description: 'Label entity representing a tag or category'
+          properties:
+            id:
+              type: integer
+              description: 'Unique identifier for the label'
+              example: 1
+            name:
+              type: string
+              description: 'Name of the label'
+              example: 'Nature'
+            photos:
+              type: array
+              description: 'Collection of photos associated with this label'
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: 'Photo ID'
+                  name:
+                    type: string
+        PasswordUpdateResponse:
+          type: object
+          description: 'Response for successful password update'
+          properties:
+            token:
+              type: string
+              description: 'JWT token returned after successful password update'
+              example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
+            message:
+              type: string
+              description: 'Confirmation message for password update'
+              example: 'Password updated successfully'
+          required:
+            - token
+            - message
+        Photo:
+          type: object
+          description: 'Photo entity representing an image and its metadata'
+          properties:
+            id:
+              type: integer
+              description: 'Unique identifier for the photo'
+              example: 1
+            name:
+              type: string
+              description: 'Name of the photo'
+              example: 'Sunset'
+            created_at:
+              type: string
+              format: date-time
+              description: 'Timestamp when the photo was created'
+            album:
+              type: object
+              description: 'The album this photo belongs to'
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+            owner:
+              type: object
+              description: 'The owner of the photo'
+              properties:
+                id:
+                  type: integer
+                email:
+                  type: string
+            labels:
+              type: array
+              description: 'Labels associated with this photo'
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        UnauthorizedResponse:
+          type: object
+          description: 'Response indicating unauthorized access'
+          properties:
+            success:
+              type: boolean
+              description: 'Indicates if the request was successful'
+              example: false
+            status:
+              type: integer
+              description: 'HTTP status code for unauthorized access'
+              example: 401
+            message:
+              type: string
+              description: 'Error message indicating the reason for unauthorized access'
+              example: 'Unauthorized'
+            reason:
+              type: string
+              description: 'Additional context or reason for the unauthorized error'
+              example: 'Invalid or missing authentication token'
+          required:
+            - success
+            - status
+            - message
+        Response400:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: false
+            status:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: "Bad Body"
+            reason:
+              type: string
+              example: "Bad Request"
+        Response404:
+          response: 404,
+          description: 'Not found'
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: false
+            status:
+              type: integer
+              example: 404
+            message:
+              type: string
+              example: "Not Found"
+            reason:
+              type: string
+              example: "Resource not found"
+        Response500:
+          description: 'Internal Server Error'
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: false
+            status:
+              type: integer
+              example: 500
+            reason:
+              type: string
+              example: "Internal Server Error"
+    info:
+      title: PicsManager
+      description: Epitech project
+      version: 1.0.0
+  areas: # to filter documented areas
+    path_patterns:
+      - ^/api/albums
+      - /api/register
+      - /api/password
+      - /api
+      #- ^/api(?!/doc$) # Accepts routes under /api except /api/doc
