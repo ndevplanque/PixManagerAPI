@@ -59,10 +59,7 @@ class PasswordValidator
         }
 
         if (!empty($policyErrors)) {
-            throw new HttpException(
-                Response::HTTP_BAD_REQUEST,
-                implode(' ', $policyErrors)
-            );
+            throw new HttpException(Response::HTTP_BAD_REQUEST, implode(' ', $policyErrors));
         }
 
         return $newPassword;
